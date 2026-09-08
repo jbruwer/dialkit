@@ -3,8 +3,8 @@ import { TimelineStore, type TimelineMeta, type TimelineClipMeta } from '../stor
 import { TimelineUiStore } from '../store/TimelineUiStore';
 import { clampClipMove, clampClipResizeEnd, clampClipResizeStart, clampStepResize, clampTrackDelay, computeClipStaticFromValues, formatSeconds, formatStepLabel, normalizeTimelineValuesForCopy, TIMELINE_MIN_CLIP_DURATION, timelinePopoverDisplayValues, type TimelineStepStatic } from '../timeline-core';
 import { clamp } from '../transition-math';
-import { findControl } from '../shortcut-utils';
-import { getDropdownPosition } from '../dropdown-position';
+import { eventWithin, findControl } from '../shortcut-utils';
+import { getDropdownPosition, observeDropdownPosition } from '../dropdown-position';
 import { buildCopyInstruction } from '../copy-instruction';
 import { ICON_CHEVRON, ICON_PLAY, ICON_PAUSE, ICON_REPLAY, ICON_CLIPBOARD_PLAIN, ICON_CHECK } from '../icons';
 import { mountControlRenderer } from './ControlRenderer';
@@ -583,7 +583,10 @@ function mountSection(host: HTMLElement, initial: TimelineMeta, options: DialTim
     const content = element('div', 'dialkit-timeline-popover-body');
     popup.append(heading, content);
     root.append(popup);
-    document.body.append(root);
+    // Keep the owning tree's styles without inheriting the dock's lower stacking context.
+    const tree = target.getRootNode();
+    const container = tree instanceof ShadowRoot ? tree : target.ownerDocument.body;
+    container.append(root);
     const rendererProps = () => {
       const values = DialStore.getValues(meta.id);
       const durationMeta = getControl(`${path}.duration`);
@@ -593,16 +596,17 @@ function mountSection(host: HTMLElement, initial: TimelineMeta, options: DialTim
     const renderer = mountControlRenderer(content, rendererProps());
     const rect = target.getBoundingClientRect();
     const position = () => {
-      const p = getDropdownPosition({ getBoundingClientRect: () => rect } as HTMLElement, document.body, { fixed: true, width: 280, maxHeight: window.innerHeight - 24, dropdownHeight: popup.scrollHeight + 2 });
+      const p = getDropdownPosition({ getBoundingClientRect: () => rect } as HTMLElement, target.ownerDocument.body, { fixed: true, width: 280, maxHeight: window.innerHeight - 24, dropdownHeight: popup.scrollHeight + 2 });
       Object.assign(popup.style, { left: `${clamp(rect.left + rect.width / 2 - p.width / 2, 12, Math.max(12, window.innerWidth - p.width - 12))}px`, top: `${p.top}px`, width: `${p.width}px`, maxHeight: `${p.maxHeight}px` });
       popup.dataset.placement = p.above ? 'above' : 'below';
     };
-    const observer = new ResizeObserver(position);
-    observer.observe(popup);
-    window.addEventListener('resize', position);
-    position();
+    // A transformed shadow host is the containing block for fixed descendants, so the editor is promoted to the
+    // top layer like the other floating controls; its coordinates stay viewport-relative and its tree keeps styling it.
+    popup.style.position = 'fixed';
+    const stopPosition = observeDropdownPosition(target, position, () => popup);
     const outside = (event: PointerEvent) => {
-      if (!root.contains(event.target as Node) && !(event.target as Element).closest('.dialkit-timeline-clip'))
+      const origin = event.composedPath()[0];
+      if (!eventWithin(event, root) && !(origin instanceof Element && origin.closest('.dialkit-timeline-clip')))
         closeEditor();
     };
     const key = (event: KeyboardEvent) => {
@@ -619,8 +623,7 @@ function mountSection(host: HTMLElement, initial: TimelineMeta, options: DialTim
         root.dataset.theme = theme;
         renderer.update(rendererProps());
       }, destroy() {
-        observer.disconnect();
-        window.removeEventListener('resize', position);
+        stopPosition();
         document.removeEventListener('pointerdown', outside);
         renderer.destroy();
         root.remove();
