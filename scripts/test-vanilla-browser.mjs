@@ -72,6 +72,10 @@ try {
   await page.getByRole('button', { name: 'Close panel', exact: true }).click();
   assert.equal(await page.locator('.dialkit-panel-inner').getAttribute('data-collapsed'), 'true');
   await page.getByRole('button', { name: 'Open panel', exact: true }).click();
+  // Settings update in place without rebuilding the panel.
+  await page.evaluate(() => window.demo.root.update({ position: 'top-left', theme: 'light' }));
+  assert.deepEqual(await page.locator('.dialkit-panel').evaluate(el => [el.dataset.position, el.parentElement.dataset.theme]), ['top-left', 'light']);
+  await page.evaluate(() => window.demo.root.update({ position: 'top-right', theme: 'dark' }));
   await page.locator('h1').click();
   await page.keyboard.down('r'); await page.keyboard.press('ArrowRight'); await page.keyboard.up('r');
   assert.equal((await values()).radius, 51);
