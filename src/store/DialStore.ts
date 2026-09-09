@@ -650,6 +650,14 @@ class DialStoreClass {
     this.actionListeners.get(panelId)?.forEach(fn => fn(path));
   }
 
+  saveNewPreset(panelId: string): string {
+    const highest = this.getPresets(panelId).reduce((max, preset) => {
+      const match = /^Version (\d+)$/.exec(preset.name);
+      return match ? Math.max(max, Number(match[1])) : max;
+    }, 1);
+    return this.savePreset(panelId, `Version ${highest + 1}`);
+  }
+
   savePreset(panelId: string, name: string): string {
     const panel = this.panels.get(panelId);
     if (!panel) throw new Error(`Panel ${panelId} not found`);
