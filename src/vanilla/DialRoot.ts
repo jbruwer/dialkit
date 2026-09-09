@@ -42,6 +42,7 @@ export function mountPanelToolbar(host: HTMLElement, id: string, hookName = 'cre
     clearTimeout(timer);
     timer = setTimeout(() => copy.replaceChildren(icon([ICON_CLIPBOARD_PLAIN.board, ICON_CLIPBOARD_PLAIN.body])), 1500);
   });
+  copy.classList.add('dialkit-toolbar-primary');
   host.append(copy);
   const stop = DialStore.subscribe(id, () => presets.update(presetProps()));
   return {

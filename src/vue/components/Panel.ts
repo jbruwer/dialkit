@@ -108,7 +108,7 @@ export const Panel = defineComponent({
           activePresetId: activePresetId.value,
         }),
         h(motion.button, {
-          class: 'dialkit-toolbar-copy',
+          class: 'dialkit-toolbar-copy dialkit-toolbar-primary',
           onClick: handleCopy,
           title: 'Copy parameters',
           whilePress: { scale: 0.95 },

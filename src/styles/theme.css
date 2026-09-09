@@ -2553,3 +2553,17 @@
 @media (forced-colors: active) {
   .dialkit-root { --dial-focus-ring: Highlight; }
 }
+
+/* Primary panel copy action */
+.dialkit-toolbar-primary {
+  background: #212121;
+  color: #ffffff;
+}
+
+.dialkit-toolbar-primary:hover {
+  background: #383838;
+}
+
+.dialkit-toolbar-primary svg {
+  color: inherit;
+}

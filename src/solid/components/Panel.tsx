@@ -151,7 +151,7 @@ export function Panel(props: PanelProps) {
 
       <button
         ref={copyButtonRef}
-        class="dialkit-toolbar-copy"
+        class="dialkit-toolbar-copy dialkit-toolbar-primary"
         onClick={handleCopy}
         onPointerDown={handleCopyTapStart}
         onPointerUp={handleCopyTapEnd}

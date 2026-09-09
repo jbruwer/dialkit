@@ -96,7 +96,7 @@ export function Panel({ panel, defaultOpen = true, inline = false, onOpenChange,
       />
 
       <motion.button
-        className="dialkit-toolbar-add"
+        className="dialkit-toolbar-add dialkit-toolbar-primary"
         onClick={handleCopy}
         title="Copy parameters"
         whileTap={{ scale: 0.9 }}
@@ -113,7 +113,7 @@ export function Panel({ panel, defaultOpen = true, inline = false, onOpenChange,
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ position: 'absolute', inset: 0, width: 16, height: 16, color: 'var(--dial-text-label)' }}
+                style={{ position: 'absolute', inset: 0, width: 16, height: 16, color: 'inherit' }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
@@ -126,7 +126,7 @@ export function Panel({ panel, defaultOpen = true, inline = false, onOpenChange,
                 key="clipboard"
                 viewBox="0 0 24 24"
                 fill="none"
-                style={{ position: 'absolute', inset: 0, width: 16, height: 16, color: 'var(--dial-text-label)' }}
+                style={{ position: 'absolute', inset: 0, width: 16, height: 16, color: 'inherit' }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}

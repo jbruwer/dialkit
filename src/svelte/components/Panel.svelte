@@ -109,7 +109,7 @@
   <PresetManager panelId={panel.id} {presets} {activePresetId} />
 
   <button
-    class="dialkit-toolbar-copy"
+    class="dialkit-toolbar-copy dialkit-toolbar-primary"
     onclick={handleCopy}
     onpointerdown={() => copyScale.set(0.95)}
     onpointerup={() => copyScale.set(1)}
