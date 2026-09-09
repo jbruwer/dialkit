@@ -35,10 +35,9 @@ import { clamp } from '../../../transition-math';
 import { buildCopyInstruction } from '../../../copy-instruction';
 import { isDevDefault } from '../../../env';
 import {
-  ICON_ADD_PRESET,
   ICON_CHEVRON,
   ICON_CHECK,
-  ICON_CLIPBOARD,
+  ICON_CLIPBOARD_PLAIN,
   ICON_PAUSE,
   ICON_PLAY,
   ICON_REPLAY,
@@ -555,7 +554,6 @@ const TimelineSection = defineComponent({
       copied.value = true;
       window.setTimeout(() => { copied.value = false; }, 1500);
     };
-    const handleAddPreset = () => DialStore.savePreset(props.meta.id, `Version ${presets.value.length + 2}`);
     const closePopover = () => { popover.value = null; };
     const openClipPopover = (clip: TimelineClipMeta, rect: DOMRect, stepKey?: string) => {
       const target = stepKey ? `${clip.key}.${stepKey}` : clip.key;
@@ -717,23 +715,18 @@ const TimelineSection = defineComponent({
         h('div', { class: 'dialkit-timeline-actions' }, [
           h(PlayPauseButton, { id: props.meta.id }),
           h(ReplayButton, { onReplay: handleReplay }),
-          h('button', { class: 'dialkit-toolbar-add', title: 'Add timeline version', 'aria-label': 'Add timeline version', onClick: handleAddPreset }, [
-            h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' },
-              ICON_ADD_PRESET.map((path) => h('path', { d: path }))),
-          ]),
           h(PresetManager, { panelId: props.meta.id, presets: presets.value, activePresetId: activePresetId.value }),
           h('button', {
-            class: 'dialkit-toolbar-add',
+            class: 'dialkit-toolbar-add dialkit-toolbar-primary',
             title: 'Copy parameters',
             'aria-label': copied.value ? 'Copied parameters' : 'Copy parameters',
             onClick: handleCopy,
           }, [h('span', { style: { position: 'relative', width: '16px', height: '16px' } }, [
             copied.value
-              ? h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', style: iconStyle }, [h('path', { d: ICON_CHECK })])
-              : h('svg', { viewBox: '0 0 24 24', fill: 'none', style: iconStyle }, [
-                h('path', { d: ICON_CLIPBOARD.board, stroke: 'currentColor', 'stroke-width': '2', 'stroke-linejoin': 'round' }),
-                h('path', { d: ICON_CLIPBOARD.sparkle, fill: 'currentColor' }),
-                h('path', { d: ICON_CLIPBOARD.body, stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+              ? h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', style: { ...iconStyle, color: 'inherit' } }, [h('path', { d: ICON_CHECK })])
+              : h('svg', { viewBox: '0 0 24 24', fill: 'none', style: { ...iconStyle, color: 'inherit' } }, [
+                h('path', { d: ICON_CLIPBOARD_PLAIN.board, stroke: 'currentColor', 'stroke-width': '2', 'stroke-linejoin': 'round' }),
+                h('path', { d: ICON_CLIPBOARD_PLAIN.body, stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
               ]),
           ])]),
           h('button', {

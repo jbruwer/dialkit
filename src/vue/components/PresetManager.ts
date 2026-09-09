@@ -2,7 +2,7 @@ import { observeDropdownKeyboard } from '../../dropdown-keyboard';
 import { openDropdownOnKey } from '../../control-keyboard';
 import { Teleport, defineComponent, h, ref, watch, type PropType } from 'vue';
 import { AnimatePresence, motion } from 'motion-v';
-import { ICON_CHEVRON, ICON_TRASH } from '../../icons';
+import { ICON_CHEVRON, ICON_TRASH, ICON_PLUS, ICON_CHECK } from '../../icons';
 import { DialStore } from '../../store/DialStore';
 import type { Preset } from '../../store/DialStore';
 
@@ -27,11 +27,9 @@ export const PresetManager = defineComponent({
     const triggerRef = ref<HTMLElement | null>(null);
     const dropdownRef = ref<HTMLElement | null>(null);
 
-    const hasPresets = () => props.presets.length > 0;
     const activePreset = () => props.presets.find((preset) => preset.id === props.activePresetId);
 
     const open = () => {
-      if (!hasPresets()) return;
       const rect = triggerRef.value?.getBoundingClientRect();
       if (rect) {
         pos.value = { top: rect.bottom + 4, left: rect.left, width: rect.width };
@@ -94,6 +92,8 @@ export const PresetManager = defineComponent({
       DialStore.deletePreset(props.panelId, presetId);
     };
 
+    const glyph = (path: string | null) => h('svg', { class: 'dialkit-preset-check', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'aria-hidden': 'true' }, path ? [h('path', { d: path })] : []);
+
     return () => h('div', { class: 'dialkit-preset-manager' }, [
       h('button', {
         ref: triggerRef,
@@ -101,8 +101,7 @@ export const PresetManager = defineComponent({
         onClick: toggle,
         'data-open': String(isOpen.value),
         'data-has-preset': String(!!activePreset()),
-        'data-disabled': String(!hasPresets()),
-        type: 'button', 'aria-haspopup': 'menu', 'aria-expanded': isOpen.value, disabled: !hasPresets(),
+        type: 'button', 'aria-haspopup': 'menu', 'aria-expanded': isOpen.value,
         'aria-label': 'Versions', onKeydown: (e: KeyboardEvent) => openDropdownOnKey(e, open),
       }, [
         h('span', { class: 'dialkit-preset-label' }, activePreset()?.name ?? 'Version 1'),
@@ -114,7 +113,7 @@ export const PresetManager = defineComponent({
           'stroke-width': '2.5',
           'stroke-linecap': 'round',
           'stroke-linejoin': 'round',
-          animate: { rotate: isOpen.value ? 180 : 0, opacity: hasPresets() ? 0.6 : 0.25 },
+          animate: { rotate: isOpen.value ? 180 : 0, opacity: 0.6 },
           transition: { type: 'spring', visualDuration: 0.2, bounce: 0.15 },
         }, [h('path', { d: ICON_CHEVRON })]),
       ]),
@@ -141,7 +140,7 @@ export const PresetManager = defineComponent({
                 class: 'dialkit-preset-item',
                 'data-active': String(!props.activePresetId),
                 onClick: () => handleSelect(null),
-              }, [h('button', { type: 'button', class: 'dialkit-preset-name' }, 'Version 1')]),
+              }, [glyph(!props.activePresetId ? ICON_CHECK : null), h('button', { type: 'button', class: 'dialkit-preset-name' }, 'Version 1')]),
 
               ...props.presets.map((preset) => h('div', {
                 key: preset.id,
@@ -149,6 +148,7 @@ export const PresetManager = defineComponent({
                 'data-active': String(preset.id === props.activePresetId),
                 onClick: () => handleSelect(preset.id),
               }, [
+                glyph(preset.id === props.activePresetId ? ICON_CHECK : null),
                 h('button', { type: 'button', class: 'dialkit-preset-name' }, preset.name),
                 h('button', {
                   class: 'dialkit-preset-delete',
@@ -165,6 +165,8 @@ export const PresetManager = defineComponent({
                   }, ICON_TRASH.map((d) => h('path', { d }))),
                 ]),
               ])),
+              h('div', { class: 'dialkit-preset-divider', role: 'separator' }),
+              h('button', { type: 'button', class: 'dialkit-preset-create', onClick: () => { DialStore.saveNewPreset(props.panelId); close(); triggerRef.value?.focus(); } }, [glyph(ICON_PLUS[0]), 'New version']),
             ])]
             : [],
         }),

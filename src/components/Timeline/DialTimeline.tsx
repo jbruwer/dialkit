@@ -25,7 +25,7 @@ import type { TimelineClipLoop, TimelineStepStatic } from '../../timeline-core';
 import { clamp } from '../../transition-math';
 import { buildCopyInstruction } from '../../copy-instruction';
 import { isDevDefault } from '../../env';
-import { ICON_ADD_PRESET, ICON_CHEVRON, ICON_CHECK, ICON_CLIPBOARD, ICON_PAUSE, ICON_PLAY, ICON_REPLAY } from '../../icons';
+import { ICON_CHEVRON, ICON_CHECK, ICON_CLIPBOARD_PLAIN, ICON_PAUSE, ICON_PLAY, ICON_REPLAY } from '../../icons';
 import { findControl } from '../../shortcut-utils';
 import { ControlRenderer } from '../ControlRenderer';
 import { PresetManager } from '../PresetManager';
@@ -761,10 +761,6 @@ const TimelineSection = memo(function TimelineSection({
     setTimeout(() => setCopied(false), 1500);
   }, [meta.clips, meta.id, meta.name]);
 
-  const handleAddPreset = useCallback(() => {
-    DialStore.savePreset(meta.id, `Version ${presets.length + 2}`);
-  }, [meta.id, presets.length]);
-
   const closePopover = useCallback(() => setPopover(null), []);
 
   const openClipPopover = useCallback(
@@ -990,26 +986,14 @@ const TimelineSection = memo(function TimelineSection({
         <div className="dialkit-timeline-actions">
           <PlayPauseButton id={meta.id} />
           <ReplayButton onReplay={handleReplay} />
-          <motion.button
-            className="dialkit-toolbar-add"
-            onClick={handleAddPreset}
-            title="Add timeline version"
-            aria-label="Add timeline version"
-            whileTap={{ scale: 0.9 }}
-            transition={{ type: 'spring', visualDuration: 0.15, bounce: 0.3 }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              {ICON_ADD_PRESET.map((d, i) => <path key={i} d={d} />)}
-            </svg>
-          </motion.button>
+
           <PresetManager
             panelId={meta.id}
             presets={presets}
             activePresetId={activePresetId}
-            onAdd={handleAddPreset}
           />
           <motion.button
-            className="dialkit-toolbar-add"
+            className="dialkit-toolbar-add dialkit-toolbar-primary"
             onClick={handleCopy}
             title="Copy parameters"
             aria-label={copied ? 'Copied parameters' : 'Copy parameters'}
@@ -1028,7 +1012,7 @@ const TimelineSection = memo(function TimelineSection({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     aria-hidden="true"
-                    style={{ position: 'absolute', inset: 0, width: 16, height: 16, color: 'var(--dial-text-label)' }}
+                    style={{ position: 'absolute', inset: 0, width: 16, height: 16, color: 'inherit' }}
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.8, opacity: 0 }}
@@ -1042,15 +1026,14 @@ const TimelineSection = memo(function TimelineSection({
                     viewBox="0 0 24 24"
                     fill="none"
                     aria-hidden="true"
-                    style={{ position: 'absolute', inset: 0, width: 16, height: 16, color: 'var(--dial-text-label)' }}
+                    style={{ position: 'absolute', inset: 0, width: 16, height: 16, color: 'inherit' }}
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.8, opacity: 0 }}
                     transition={{ duration: 0.08 }}
                   >
-                    <path d={ICON_CLIPBOARD.board} stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                    <path d={ICON_CLIPBOARD.sparkle} fill="currentColor" />
-                    <path d={ICON_CLIPBOARD.body} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d={ICON_CLIPBOARD_PLAIN.board} stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                    <path d={ICON_CLIPBOARD_PLAIN.body} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </motion.svg>
                 )}
               </AnimatePresence>

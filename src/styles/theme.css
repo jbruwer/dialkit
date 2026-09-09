@@ -102,6 +102,7 @@
 
 
 .dialkit-panel-inner[data-collapsed="true"] {
+  transform-origin: center;
   border-radius: 50%;
   padding: 12px;
   box-sizing: border-box;
@@ -201,6 +202,11 @@
 
 .dialkit-panel:not([data-mode="inline"]) .dialkit-panel-inner:not([data-collapsed="true"]) > .dialkit-folder-root > .dialkit-panel-header:active {
   cursor: grabbing;
+}
+
+.dialkit-panel:not([data-mode="inline"]) .dialkit-panel-inner:not([data-collapsed="true"]) .dialkit-panel-icon {
+  color: var(--dial-text-label);
+  opacity: 0.6;
 }
 
 .dialkit-panel:not([data-mode="inline"]) .dialkit-panel-icon {
@@ -1387,14 +1393,20 @@
 }
 
 .dialkit-preset-item {
+  box-sizing: border-box;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px 8px 10px;
+  padding: 0 10px;
   gap: 8px;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s;
+}
+
+.dialkit-preset-item + .dialkit-preset-item {
+  margin-top: 2px;
 }
 
 .dialkit-preset-item:hover {
@@ -1454,10 +1466,15 @@
 }
 
 .dialkit-preset-delete svg {
+  transition: color 150ms ease;
   width: 14px;
   height: 14px;
   color: var(--dial-text-focus);
   pointer-events: none;
+}
+
+.dialkit-preset-delete:hover svg {
+  color: #ff3b30;
 }
 
 .dialkit-preset-save-btn {
@@ -2551,4 +2568,55 @@
 .dialkit-shortcuts-dropdown { margin: 0; inset: auto; overflow-y: auto; }
 @media (forced-colors: active) {
   .dialkit-root { --dial-focus-ring: Highlight; }
+}
+
+/* Primary panel copy action */
+.dialkit-toolbar-primary {
+  background: var(--dial-text-root);
+  color: var(--dial-glass-bg);
+}
+
+.dialkit-toolbar-primary:hover {
+  background: color-mix(in srgb, var(--dial-text-root) 88%, var(--dial-glass-bg));
+}
+
+.dialkit-toolbar-primary svg {
+  color: inherit;
+}
+
+.dialkit-preset-check {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--dial-text-focus);
+}
+
+.dialkit-preset-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--dial-surface-subtle);
+}
+
+.dialkit-preset-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dial-text-label);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.dialkit-preset-create:hover,
+.dialkit-preset-create:focus-visible {
+  background: var(--dial-surface-hover);
 }

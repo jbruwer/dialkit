@@ -4,13 +4,13 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { DialStore, Preset } from '../store/DialStore';
-import { ICON_CHEVRON, ICON_TRASH } from '../icons';
+import { ICON_CHEVRON, ICON_TRASH, ICON_PLUS, ICON_CHECK } from '../icons';
 
 interface PresetManagerProps {
   panelId: string;
   presets: Preset[];
   activePresetId: string | null;
-  onAdd: () => void;
+  onAdd?: () => void;
 }
 
 export function PresetManager({ panelId, presets, activePresetId, onAdd }: PresetManagerProps) {
@@ -19,17 +19,15 @@ export function PresetManager({ panelId, presets, activePresetId, onAdd }: Prese
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
 
-  const hasPresets = presets.length > 0;
   const activePreset = presets.find((p) => p.id === activePresetId);
 
   const open = useCallback(() => {
-    if (!hasPresets) return;
     const rect = triggerRef.current?.getBoundingClientRect();
     if (rect) {
       setPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
     }
     setIsOpen(true);
-  }, [hasPresets]);
+  }, []);
 
   const close = useCallback(() => setIsOpen(false), []);
 
@@ -78,8 +76,7 @@ export function PresetManager({ panelId, presets, activePresetId, onAdd }: Prese
         onClick={toggle}
         data-open={String(isOpen)}
         data-has-preset={String(!!activePreset)}
-        data-disabled={String(!hasPresets)}
-        type="button" aria-haspopup="menu" aria-expanded={isOpen} disabled={!hasPresets}
+        type="button" aria-haspopup="menu" aria-expanded={isOpen}
         aria-label="Versions" onKeyDown={(e) => openDropdownOnKey(e, open)}
       >
         <span className="dialkit-preset-label">
@@ -93,7 +90,7 @@ export function PresetManager({ panelId, presets, activePresetId, onAdd }: Prese
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          animate={{ rotate: isOpen ? 180 : 0, opacity: hasPresets ? 0.6 : 0.25 }}
+          animate={{ rotate: isOpen ? 180 : 0, opacity: 0.6 }}
           transition={{ type: 'spring', visualDuration: 0.2, bounce: 0.15 }}
         >
           <path d={ICON_CHEVRON} />
@@ -117,6 +114,7 @@ export function PresetManager({ panelId, presets, activePresetId, onAdd }: Prese
                 data-active={String(!activePresetId)}
                 onClick={() => handleSelect(null)}
               >
+                <svg className="dialkit-preset-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">{!activePresetId && <path d={ICON_CHECK} />}</svg>
                 <button type="button" className="dialkit-preset-name">Version 1</button>
               </div>
 
@@ -127,6 +125,7 @@ export function PresetManager({ panelId, presets, activePresetId, onAdd }: Prese
                   data-active={String(preset.id === activePresetId)}
                   onClick={() => handleSelect(preset.id)}
                 >
+                  <svg className="dialkit-preset-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">{preset.id === activePresetId && <path d={ICON_CHECK} />}</svg>
                   <button type="button" className="dialkit-preset-name">{preset.name}</button>
                   <button
                     className="dialkit-preset-delete"
@@ -141,6 +140,11 @@ export function PresetManager({ panelId, presets, activePresetId, onAdd }: Prese
                   </button>
                 </div>
               ))}
+              <div className="dialkit-preset-divider" role="separator" />
+              <button type="button" className="dialkit-preset-create" onClick={() => { if (onAdd) onAdd(); else DialStore.saveNewPreset(panelId); close(); triggerRef.current?.focus(); }}>
+                <svg className="dialkit-preset-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d={ICON_PLUS[0]} /></svg>
+                New version
+              </button>
             </motion.div>
           )}
         </AnimatePresence>,

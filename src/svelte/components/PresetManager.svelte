@@ -1,6 +1,6 @@
 <script lang="ts">
   import { observeDropdownKeyboard } from '../../dropdown-keyboard';
-import { openDropdownOnKey } from '../../control-keyboard';
+  import { openDropdownOnKey } from '../../control-keyboard';
 
   import { Spring } from 'svelte/motion';
   import Portal from '../Portal.svelte';
@@ -8,7 +8,7 @@ import { openDropdownOnKey } from '../../control-keyboard';
   import type { Preset } from 'dialkit/store';
   import { dropdownTransition } from './transitions';
   import { getDialKitPortalRoot, getDropdownPosition } from '../../dropdown-position';
-  import { ICON_CHEVRON, ICON_TRASH } from '../../icons';
+  import { ICON_CHEVRON, ICON_TRASH, ICON_PLUS, ICON_CHECK } from '../../icons';
 
   let { panelId, presets, activePresetId } = $props<{
     panelId: string;
@@ -23,9 +23,8 @@ import { openDropdownOnKey } from '../../control-keyboard';
   let dropdownRef = $state<HTMLDivElement | undefined>(undefined);
 
   const chevronRotation = new Spring(0, { stiffness: 0.2, damping: 0.6 });
-  const chevronOpacity = new Spring(0.25, { stiffness: 0.2, damping: 0.6 });
+  const chevronOpacity = new Spring(0.6, { stiffness: 0.2, damping: 0.6 });
 
-  const hasPresets = $derived(presets.length > 0);
   const activePreset = $derived(presets.find((p: Preset) => p.id === activePresetId));
 
   const updatePos = () => {
@@ -34,7 +33,6 @@ import { openDropdownOnKey } from '../../control-keyboard';
   };
 
   const openDropdown = () => {
-    if (!hasPresets) return;
     updatePos();
     isOpen = true;
   };
@@ -50,7 +48,7 @@ import { openDropdownOnKey } from '../../control-keyboard';
 
   $effect(() => {
     chevronRotation.set(isOpen ? 180 : 0);
-    chevronOpacity.set(hasPresets ? 0.6 : 0.25);
+    chevronOpacity.set(0.6);
   });
 
   $effect(() => {
@@ -96,8 +94,7 @@ import { openDropdownOnKey } from '../../control-keyboard';
     onclick={() => (isOpen ? closeDropdown() : openDropdown())}
     data-open={String(isOpen)}
     data-has-preset={String(!!activePreset)}
-    data-disabled={String(!hasPresets)}
-    type="button" aria-haspopup="menu" aria-expanded={isOpen} disabled={!hasPresets}
+    type="button" aria-haspopup="menu" aria-expanded={isOpen}
     aria-label="Versions" onkeydown={(e) => openDropdownOnKey(e, openDropdown)}
   >
     <span class="dialkit-preset-label">
@@ -132,6 +129,7 @@ import { openDropdownOnKey } from '../../control-keyboard';
             data-active={String(!activePresetId)}
             onclick={() => handleSelect(null)}
           >
+            <svg class="dialkit-preset-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">{#if !activePresetId}<path d={ICON_CHECK} />{/if}</svg>
             <button type="button" class="dialkit-preset-name">Version 1</button>
           </div>
 
@@ -141,6 +139,7 @@ import { openDropdownOnKey } from '../../control-keyboard';
               data-active={String(preset.id === activePresetId)}
               onclick={() => handleSelect(preset.id)}
             >
+              <svg class="dialkit-preset-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">{#if preset.id === activePresetId}<path d={ICON_CHECK} />{/if}</svg>
               <button type="button" class="dialkit-preset-name">{preset.name}</button>
               <button
                 class="dialkit-preset-delete"
@@ -157,6 +156,11 @@ import { openDropdownOnKey } from '../../control-keyboard';
               </button>
             </div>
           {/each}
+          <div class="dialkit-preset-divider" role="separator"></div>
+          <button type="button" class="dialkit-preset-create" onclick={() => { DialStore.saveNewPreset(panelId); closeDropdown(); triggerRef?.focus(); }}>
+            <svg class="dialkit-preset-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d={ICON_PLUS[0]} /></svg>
+            New version
+          </button>
         </div>
       {/if}
     </Portal>

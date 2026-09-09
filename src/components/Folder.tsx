@@ -2,7 +2,7 @@ import { activateOnKey } from '../control-keyboard';
 import { measurePanelHeight } from '../panel-size';
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ICON_PANEL, ICON_CHEVRON } from '../icons';
+import { ICON_CLOSE, ICON_PANEL, ICON_CHEVRON } from '../icons';
 
 interface FolderProps {
   title: string;
@@ -78,13 +78,15 @@ export function Folder({ title, children, open, defaultOpen = true, isRoot = fal
           {isRoot && !inline && (
             <svg
               className="dialkit-panel-icon"
-              viewBox="0 0 16 16"
+              viewBox={isOpen ? "0 0 24 24" : "0 0 16 16"}
               fill="none"
             >
+              {isOpen ? <path d={ICON_CLOSE} stroke="currentColor" strokeWidth="2" strokeLinecap="round" /> : <>
               <path opacity="0.5" d={ICON_PANEL.path} fill="currentColor"/>
               {ICON_PANEL.circles.map((c, i) => (
                 <circle key={i} cx={c.cx} cy={c.cy} r={c.r} fill="currentColor" stroke="currentColor" strokeWidth="1.25"/>
               ))}
+              </>}
             </svg>
           )}
           {!isRoot && (
@@ -97,7 +99,7 @@ export function Folder({ title, children, open, defaultOpen = true, isRoot = fal
               strokeLinecap="round"
               strokeLinejoin="round"
               initial={false}
-              animate={{ rotate: isOpen ? 0 : 180 }}
+              animate={{ rotate: isOpen ? 180 : 0 }}
               transition={{ type: 'spring', visualDuration: 0.35, bounce: 0.15 }}
             >
               <path d={ICON_CHEVRON} />

@@ -8,7 +8,7 @@
   import { slide } from 'svelte/transition';
 
   import type { Snippet } from 'svelte';
-  import { ICON_PANEL, ICON_CHEVRON } from '../../icons';
+  import { ICON_CLOSE, ICON_PANEL, ICON_CHEVRON } from '../../icons';
 
   let {
     title,
@@ -50,7 +50,7 @@
     return () => window.removeEventListener('resize', onResize);
   });
 
-  const chevronRotation = new Spring(initiallyOpen ? 0 : 180, { stiffness: 0.2, damping: 0.6 });
+  const chevronRotation = new Spring(initiallyOpen ? 180 : 0, { stiffness: 0.2, damping: 0.6 });
   const panelWidth = new Spring(initiallyOpen ? 280 : 42, { stiffness: 0.2, damping: 0.62 });
   const panelHeight = new Spring(initiallyOpen ? 220 : 42, { stiffness: 0.2, damping: 0.62 });
   const panelRadius = new Spring(initiallyOpen ? 14 : 21, { stiffness: 0.2, damping: 0.62 });
@@ -79,7 +79,7 @@
 
   $effect(() => {
     if (isRoot) return;
-    chevronRotation.set(isOpen ? 0 : 180);
+    chevronRotation.set(isOpen ? 180 : 0);
   });
 
   $effect(() => {
@@ -172,7 +172,10 @@
             </div>
           {/if}
 
-          <svg class="dialkit-panel-icon" viewBox="0 0 16 16" fill="none">
+          <svg class="dialkit-panel-icon" viewBox={isOpen ? "0 0 24 24" : "0 0 16 16"} fill="none">
+            {#if isOpen}
+              <path d={ICON_CLOSE} stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            {:else}
             <path
               opacity="0.5"
               d={ICON_PANEL.path}
@@ -181,6 +184,7 @@
             <circle cx={ICON_PANEL.circles[0].cx} cy={ICON_PANEL.circles[0].cy} r={ICON_PANEL.circles[0].r} fill="currentColor" stroke="currentColor" stroke-width="1.25" />
             <circle cx={ICON_PANEL.circles[1].cx} cy={ICON_PANEL.circles[1].cy} r={ICON_PANEL.circles[1].r} fill="currentColor" stroke="currentColor" stroke-width="1.25" />
             <circle cx={ICON_PANEL.circles[2].cx} cy={ICON_PANEL.circles[2].cy} r={ICON_PANEL.circles[2].r} fill="currentColor" stroke="currentColor" stroke-width="1.25" />
+            {/if}
           </svg>
         </div>
 

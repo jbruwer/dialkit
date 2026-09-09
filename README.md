@@ -202,7 +202,9 @@ Read `dial.values` in React, Svelte, and vanilla; `dial.values()` in Solid; or `
 
 ### Presets and persistence
 
-Click **+** to save a version. Edits update the selected version automatically; **Version 1** holds the editable base values. **Copy** puts the current values and an instruction for applying them to your config on the clipboard.
+Open the version menu and choose **New version** to save and select a version. Edits update the selected version automatically; **Version 1** holds the editable base values. **Copy** puts the current values and an instruction for applying them to your config on the clipboard.
+
+The version menu is always available, including before any versions are saved. A checkmark identifies the current version, and saved versions can be deleted from the menu. Panels and timelines share this behavior across React, Solid, Svelte, Vue, and vanilla JavaScript.
 
 Use a stable `id` to retain values across unmounts. Add `persist: true` to retain them across page reloads:
 
