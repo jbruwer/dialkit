@@ -3,7 +3,7 @@ import { observeDropdownKeyboard } from '../dropdown-keyboard';
 import { openDropdownOnKey } from '../control-keyboard';
 import { getDialKitPortalRoot, getDropdownPosition, observeDropdownPosition } from '../dropdown-position';
 import { findControl, formatToggleShortcut } from '../shortcut-utils';
-import { ICON_CHEVRON, ICON_TRASH } from '../icons';
+import { ICON_CHEVRON, ICON_TRASH, ICON_PLUS, ICON_CHECK } from '../icons';
 import { element, icon, type Mounted } from './dom';
 export function popupMenu(trigger: HTMLButtonElement, className: string, kind: 'select' | 'presets' | 'help', populate: (popup: HTMLElement) => void) {
   let popup: HTMLDivElement | undefined;
@@ -137,35 +137,40 @@ export function mountPresetManager(host: HTMLElement, initial: PresetManagerProp
       const item = element('div', 'dialkit-preset-item');
       item.dataset.active = String(preset.id === props.activePresetId);
       const name = element('button', 'dialkit-preset-name', preset.name);
-      name.addEventListener('click', () => {
+      item.addEventListener('click', () => {
         if (preset.id)
           DialStore.loadPreset(props.panelId, preset.id);
         else
           DialStore.clearActivePreset(props.panelId);
         menu.close();
       });
-      item.append(name);
+      item.append(icon(preset.id === props.activePresetId ? ICON_CHECK : [], 'dialkit-preset-check'), name);
       if (preset.id) {
         const del = element('button', 'dialkit-preset-delete');
         del.title = `Delete ${preset.name}`;
         del.setAttribute('aria-label', del.title);
         del.append(icon(ICON_TRASH));
-        del.addEventListener('click', () => DialStore.deletePreset(props.panelId, preset.id!));
+        del.addEventListener('click', (event) => { event.stopPropagation(); DialStore.deletePreset(props.panelId, preset.id!); });
         item.append(del);
       }
       return item;
     }));
+    const divider = element('div', 'dialkit-preset-divider');
+    divider.setAttribute('role', 'separator');
+    const create = element('button', 'dialkit-preset-create');
+    create.append(icon(ICON_PLUS, 'dialkit-preset-check'), document.createTextNode('New version'));
+    create.addEventListener('click', () => {
+      if (props.onAdd) props.onAdd(); else DialStore.saveNewPreset(props.panelId);
+      menu.close();
+      trigger.focus();
+    });
+    popup.append(divider, create);
   });
   function render() {
     const active = props.presets.find(p => p.id === props.activePresetId);
     label.textContent = active?.name ?? 'Version 1';
     trigger.dataset.hasPreset = String(!!active);
-    trigger.dataset.disabled = String(!props.presets.length);
-    trigger.disabled = !props.presets.length;
-    if (trigger.disabled)
-      menu.close();
-    else
-      menu.refresh();
+    menu.refresh();
   }
   render();
   return {

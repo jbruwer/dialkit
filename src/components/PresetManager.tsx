@@ -10,7 +10,7 @@ interface PresetManagerProps {
   panelId: string;
   presets: Preset[];
   activePresetId: string | null;
-  onAdd: () => void;
+  onAdd?: () => void;
 }
 
 export function PresetManager({ panelId, presets, activePresetId, onAdd }: PresetManagerProps) {
@@ -141,7 +141,7 @@ export function PresetManager({ panelId, presets, activePresetId, onAdd }: Prese
                 </div>
               ))}
               <div className="dialkit-preset-divider" role="separator" />
-              <button type="button" className="dialkit-preset-create" onClick={() => { onAdd(); close(); triggerRef.current?.focus(); }}>
+              <button type="button" className="dialkit-preset-create" onClick={() => { if (onAdd) onAdd(); else DialStore.saveNewPreset(panelId); close(); triggerRef.current?.focus(); }}>
                 <svg className="dialkit-preset-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d={ICON_PLUS[0]} /></svg>
                 New version
               </button>

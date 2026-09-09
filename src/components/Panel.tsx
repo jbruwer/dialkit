@@ -48,10 +48,6 @@ export function Panel({ panel, defaultOpen = true, inline = false, onOpenChange,
   const presets = DialStore.getPresets(panel.id);
   const activePresetId = DialStore.getActivePresetId(panel.id);
 
-  const handleAddPreset = () => {
-    const nextNum = presets.length + 2;
-    DialStore.savePreset(panel.id, `Version ${nextNum}`);
-  };
 
   const handleCopy = async () => {
     try { await navigator.clipboard.writeText(buildCopyInstruction('useDialKit', panel.name, values)); }
@@ -78,7 +74,6 @@ export function Panel({ panel, defaultOpen = true, inline = false, onOpenChange,
         panelId={panel.id}
         presets={presets}
         activePresetId={activePresetId}
-        onAdd={handleAddPreset}
       />
 
       <motion.button

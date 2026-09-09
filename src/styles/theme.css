@@ -2567,12 +2567,12 @@
 
 /* Primary panel copy action */
 .dialkit-toolbar-primary {
-  background: #212121;
-  color: #ffffff;
+  background: var(--dial-text-root);
+  color: var(--dial-glass-bg);
 }
 
 .dialkit-toolbar-primary:hover {
-  background: #383838;
+  background: color-mix(in srgb, var(--dial-text-root) 88%, var(--dial-glass-bg));
 }
 
 .dialkit-toolbar-primary svg {

@@ -3,7 +3,7 @@ import { openDropdownOnKey } from '../../control-keyboard';
 import { createSignal, createEffect, on, onMount, onCleanup, Show, For } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { animate } from 'motion';
-import { ICON_CHEVRON, ICON_TRASH } from '../../icons';
+import { ICON_CHEVRON, ICON_TRASH, ICON_PLUS, ICON_CHECK } from '../../icons';
 import { getDialKitPortalRoot, getDropdownPosition } from '../../dropdown-position';
 import { DialStore } from '../../store/DialStore';
 import type { Preset } from '../../store/DialStore';
@@ -13,7 +13,7 @@ interface PresetManagerProps {
   panelId: string;
   presets: Preset[];
   activePresetId: string | null;
-  onAdd: () => void;
+  onAdd?: () => void;
 }
 
 export function PresetManager(props: PresetManagerProps) {
@@ -24,7 +24,6 @@ export function PresetManager(props: PresetManagerProps) {
   let chevronRef!: SVGSVGElement;
   let chevronAnim: AnimationHandle | null = null;
 
-  const hasPresets = () => props.presets.length > 0;
   const activePreset = () => props.presets.find((p) => p.id === props.activePresetId);
 
   const dropdown = createDropdownPresence((el, done) =>
@@ -41,12 +40,12 @@ export function PresetManager(props: PresetManagerProps) {
   });
 
   // Renders at its resting state via inline style; animate on changes only.
-  createEffect(on([dropdown.isOpen, hasPresets] as const, ([open, has]) => {
+  createEffect(on(dropdown.isOpen, (open) => {
     if (!chevronRef) return;
     chevronAnim?.stop();
     chevronAnim = animate(
       chevronRef,
-      { rotate: open ? 180 : 0, opacity: has ? 0.6 : 0.25 },
+      { rotate: open ? 180 : 0, opacity: 0.6 },
       { type: 'spring', visualDuration: 0.2, bounce: 0.15 }
     );
   }, { defer: true }));
@@ -58,7 +57,6 @@ export function PresetManager(props: PresetManagerProps) {
   };
 
   const openDropdown = () => {
-    if (!hasPresets()) return;
     updatePos();
     dropdown.open();
   };
@@ -99,8 +97,7 @@ export function PresetManager(props: PresetManagerProps) {
         onClick={toggle}
         data-open={String(dropdown.isOpen())}
         data-has-preset={String(!!activePreset())}
-        data-disabled={String(!hasPresets())}
-        type="button" aria-haspopup="menu" aria-expanded={dropdown.isOpen()} disabled={!hasPresets()}
+        type="button" aria-haspopup="menu" aria-expanded={dropdown.isOpen()}
         aria-label="Versions" onKeyDown={(e) => openDropdownOnKey(e, openDropdown)}
       >
         <span class="dialkit-preset-label">
@@ -115,7 +112,7 @@ export function PresetManager(props: PresetManagerProps) {
           stroke-width="2.5"
           stroke-linecap="round"
           stroke-linejoin="round"
-          style={{ opacity: hasPresets() ? 0.6 : 0.25 }}
+          style={{ opacity: 0.6 }}
         >
           <path d={ICON_CHEVRON} />
         </svg>
@@ -147,6 +144,7 @@ export function PresetManager(props: PresetManagerProps) {
                 data-active={String(!props.activePresetId)}
                 onClick={() => handleSelect(null)}
               >
+                <svg class="dialkit-preset-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><Show when={!props.activePresetId}><path d={ICON_CHECK} /></Show></svg>
                 <button type="button" class="dialkit-preset-name">Version 1</button>
               </div>
 
@@ -157,6 +155,7 @@ export function PresetManager(props: PresetManagerProps) {
                     data-active={String(preset.id === props.activePresetId)}
                     onClick={() => handleSelect(preset.id)}
                   >
+                    <svg class="dialkit-preset-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><Show when={preset.id === props.activePresetId}><path d={ICON_CHECK} /></Show></svg>
                     <button type="button" class="dialkit-preset-name">{preset.name}</button>
                     <button
                       class="dialkit-preset-delete"
@@ -174,6 +173,11 @@ export function PresetManager(props: PresetManagerProps) {
                   </div>
                 )}
               </For>
+              <div class="dialkit-preset-divider" role="separator" />
+              <button type="button" class="dialkit-preset-create" onClick={() => { if (props.onAdd) props.onAdd(); else DialStore.saveNewPreset(props.panelId); dropdown.close(); triggerRef.focus(); }}>
+                <svg class="dialkit-preset-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d={ICON_PLUS[0]} /></svg>
+                New version
+              </button>
             </div>
           </Show>
         </Portal>

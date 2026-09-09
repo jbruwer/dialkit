@@ -33,10 +33,9 @@ import { clamp } from '../../../transition-math';
 import { buildCopyInstruction } from '../../../copy-instruction';
 import { isDevDefault } from '../../../env';
 import {
-  ICON_ADD_PRESET,
   ICON_CHEVRON,
   ICON_CHECK,
-  ICON_CLIPBOARD,
+  ICON_CLIPBOARD_PLAIN,
   ICON_PAUSE,
   ICON_PLAY,
   ICON_REPLAY,
@@ -632,9 +631,6 @@ function TimelineSection(props: {
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1500);
   };
-  const handleAddPreset = () => {
-    DialStore.savePreset(props.meta.id, `Version ${presets().length + 2}`);
-  };
   const closePopover = () => setPopover(null);
 
   const openClipPopover = (clip: TimelineClipMeta, rect: DOMRect, stepKey?: string) => {
@@ -827,19 +823,14 @@ function TimelineSection(props: {
         <div class="dialkit-timeline-actions">
           <PlayPauseButton id={props.meta.id} />
           <ReplayButton onReplay={handleReplay} />
-          <button class="dialkit-toolbar-add" onClick={handleAddPreset} title="Add timeline version" aria-label="Add timeline version">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <For each={ICON_ADD_PRESET}>{(path) => <path d={path} />}</For>
-            </svg>
-          </button>
+
           <PresetManager
             panelId={props.meta.id}
             presets={presets()}
             activePresetId={activePresetId()}
-            onAdd={handleAddPreset}
           />
           <button
-            class="dialkit-toolbar-add"
+            class="dialkit-toolbar-add dialkit-toolbar-primary"
             onClick={handleCopy}
             title="Copy parameters"
             aria-label={copied() ? 'Copied parameters' : 'Copy parameters'}
@@ -848,14 +839,13 @@ function TimelineSection(props: {
               <Show
                 when={copied()}
                 fallback={
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style={iconStyle}>
-                    <path d={ICON_CLIPBOARD.board} stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
-                    <path d={ICON_CLIPBOARD.sparkle} fill="currentColor" />
-                    <path d={ICON_CLIPBOARD.body} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ ...iconStyle, color: 'inherit' }}>
+                    <path d={ICON_CLIPBOARD_PLAIN.board} stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                    <path d={ICON_CLIPBOARD_PLAIN.body} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 }
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style={iconStyle}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style={{ ...iconStyle, color: 'inherit' }}>
                   <path d={ICON_CHECK} />
                 </svg>
               </Show>

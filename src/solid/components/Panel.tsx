@@ -1,7 +1,7 @@
 import { buildCopyInstruction } from '../../copy-instruction';
 import { batch, createSignal, createEffect, on, onMount, onCleanup, type JSX } from 'solid-js';
 import { animate } from 'motion';
-import { ICON_CLIPBOARD_PLAIN, ICON_CHECK, ICON_PLUS } from '../../icons';
+import { ICON_CLIPBOARD_PLAIN, ICON_CHECK } from '../../icons';
 import { DialStore } from '../../store/DialStore';
 import type { PanelConfig, DialValue } from '../../store/DialStore';
 import type { AnimationHandle } from '../primitives';
@@ -30,11 +30,9 @@ export function Panel(props: PanelProps) {
   // The store owns open/collapsed state so it can be driven programmatically.
   const [storeOpen, setStoreOpen] = createSignal(DialStore.getPanelOpen(props.panel.id));
   const isOpen = () => storeOpen() ?? props.defaultOpen ?? true;
-  let addButtonRef!: HTMLButtonElement;
   let copyButtonRef!: HTMLButtonElement;
   let copyClipboardIconRef!: HTMLSpanElement;
   let copyCheckIconRef!: HTMLSpanElement;
-  let addTapAnim: AnimationHandle | null = null;
   let copyTapAnim: AnimationHandle | null = null;
   let copyClipboardAnim: AnimationHandle | null = null;
   let copyCheckAnim: AnimationHandle | null = null;
@@ -53,11 +51,6 @@ export function Panel(props: PanelProps) {
     DialStore.initPanelOpen(props.panel.id, props.defaultOpen ?? true);
     onCleanup(unsub);
   });
-
-  const handleAddPreset = () => {
-    const nextNum = presets().length + 2;
-    DialStore.savePreset(props.panel.id, `Version ${nextNum}`);
-  };
 
   const handleCopy = async () => {
     const instruction = buildCopyInstruction('createDialKit', props.panel.name, values());
@@ -90,23 +83,10 @@ export function Panel(props: PanelProps) {
 
   onCleanup(() => {
     clearTimeout(copyTimeout);
-    addTapAnim?.stop();
     copyTapAnim?.stop();
     copyClipboardAnim?.stop();
     copyCheckAnim?.stop();
   });
-
-  const handleAddTapStart = () => {
-    if (!addButtonRef) return;
-    addTapAnim?.stop();
-    addTapAnim = animate(addButtonRef, { scale: 0.9 }, tapTransition);
-  };
-
-  const handleAddTapEnd = () => {
-    if (!addButtonRef) return;
-    addTapAnim?.stop();
-    addTapAnim = animate(addButtonRef, { scale: 1 }, tapTransition);
-  };
 
   const handleCopyTapStart = () => {
     if (!copyButtonRef) return;
@@ -127,37 +107,21 @@ export function Panel(props: PanelProps) {
 
   const toolbar = (
     <>
-      <button
-        ref={addButtonRef}
-        class="dialkit-toolbar-add"
-        onClick={handleAddPreset}
-        onPointerDown={handleAddTapStart}
-        onPointerUp={handleAddTapEnd}
-        onPointerCancel={handleAddTapEnd}
-        onPointerLeave={handleAddTapEnd}
-        title="Add preset"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d={ICON_PLUS[0]} />
-        </svg>
-      </button>
-
       <PresetManager
         panelId={props.panel.id}
         presets={presets()}
         activePresetId={activePresetId()}
-        onAdd={handleAddPreset}
       />
 
       <button
         ref={copyButtonRef}
-        class="dialkit-toolbar-copy dialkit-toolbar-primary"
+        class="dialkit-toolbar-add dialkit-toolbar-primary"
         onClick={handleCopy}
         onPointerDown={handleCopyTapStart}
         onPointerUp={handleCopyTapEnd}
         onPointerCancel={handleCopyTapEnd}
         onPointerLeave={handleCopyTapEnd}
-        title="Copy parameters"
+        title="Copy parameters" aria-label="Copy parameters"
       >
         <span class="dialkit-toolbar-copy-icon-wrap">
           <span
@@ -180,7 +144,6 @@ export function Panel(props: PanelProps) {
             </svg>
           </span>
         </span>
-        Copy
       </button>
 
       {props.toolbarExtra}

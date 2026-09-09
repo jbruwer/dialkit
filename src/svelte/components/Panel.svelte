@@ -7,7 +7,7 @@
   import Folder from './Folder.svelte';
   import PresetManager from './PresetManager.svelte';
   import ControlRenderer from './ControlRenderer.svelte';
-  import { ICON_CLIPBOARD_PLAIN, ICON_CHECK, ICON_PLUS } from '../../icons';
+  import { ICON_CLIPBOARD_PLAIN, ICON_CHECK } from '../../icons';
 
   let { panel, defaultOpen = true, inline = false, onOpenChange, variant = 'root', toolbarExtra } = $props<{
     panel: PanelConfig;
@@ -18,7 +18,6 @@
     toolbarExtra?: Snippet;
   }>();
 
-
   let copied = $state(false);
   // The store owns open/collapsed state so it can be driven programmatically.
   let storeOpen = $state<boolean | undefined>(DialStore.getPanelOpen(panel.id));
@@ -27,7 +26,6 @@
   let presets = $state<Preset[]>(DialStore.getPresets(panel.id));
   let activePresetId = $state<string | null>(DialStore.getActivePresetId(panel.id));
 
-  const addScale = new Spring(1, { stiffness: 0.25, damping: 0.7 });
   const copyScale = new Spring(1, { stiffness: 0.25, damping: 0.7 });
   const clipboardOpacity = new Spring(1, { stiffness: 0.25, damping: 0.7 });
   const clipboardScale = new Spring(1, { stiffness: 0.2, damping: 0.6 });
@@ -66,11 +64,6 @@
     checkScale.set(0.5);
   });
 
-  const handleAddPreset = () => {
-    const nextNum = presets.length + 2;
-    DialStore.savePreset(panel.id, `Version ${nextNum}`);
-  };
-
   const handleCopy = async () => {
     const instruction = buildCopyInstruction('createDialKit', panel.name, values);
 
@@ -91,31 +84,16 @@
 </script>
 
 {#snippet panelToolbar()}
-  <button
-    class="dialkit-toolbar-add"
-    onclick={handleAddPreset}
-    onpointerdown={() => addScale.set(0.9)}
-    onpointerup={() => addScale.set(1)}
-    onpointercancel={() => addScale.set(1)}
-    onpointerleave={() => addScale.set(1)}
-    title="Add preset"
-    style:transform={`scale(${addScale.current})`}
-  >
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d={ICON_PLUS[0]} />
-    </svg>
-  </button>
-
   <PresetManager panelId={panel.id} {presets} {activePresetId} />
 
   <button
-    class="dialkit-toolbar-copy dialkit-toolbar-primary"
+    class="dialkit-toolbar-add dialkit-toolbar-primary"
     onclick={handleCopy}
     onpointerdown={() => copyScale.set(0.95)}
     onpointerup={() => copyScale.set(1)}
     onpointercancel={() => copyScale.set(1)}
     onpointerleave={() => copyScale.set(1)}
-    title="Copy parameters"
+    title="Copy parameters" aria-label="Copy parameters"
     style:transform={`scale(${copyScale.current})`}
   >
     <span class="dialkit-toolbar-copy-icon-wrap">
@@ -146,7 +124,6 @@
         <path d={ICON_CHECK} />
       </svg>
     </span>
-    Copy
   </button>
 
   {#if toolbarExtra}

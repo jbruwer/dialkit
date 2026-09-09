@@ -3,7 +3,7 @@ import { TimelineStore } from '../store/TimelineStore';
 import { TimelineUiStore } from '../store/TimelineUiStore';
 import { blockPanelDragClick, capturePanelPointer, releasePanelPointer, getPanelCorner, getPanelDragHandle, getPanelDragOffset, getPanelDragStart, getPanelOriginX, getPanelOriginY, hasPanelDragMoved, type PanelDragStart, type PanelDragOffset } from '../panel-drag';
 import { buildCopyInstruction } from '../copy-instruction';
-import { ICON_PLUS, ICON_CLIPBOARD_PLAIN, ICON_CHECK } from '../icons';
+import { ICON_CLIPBOARD_PLAIN, ICON_CHECK } from '../icons';
 import { mountControlRenderer } from './ControlRenderer';
 import { mountFolder } from './controls';
 import { mountPresetManager } from './menus';
@@ -25,8 +25,6 @@ export interface DialRootOptions {
 export function mountPanelToolbar(host: HTMLElement, id: string, hookName = 'createDialKit') {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let destroyed = false;
-  const add = button('Add preset', ICON_PLUS, () => DialStore.savePreset(id, `Version ${DialStore.getPresets(id).length + 2}`));
-  host.append(add);
   const presetProps = () => ({ panelId: id, presets: DialStore.getPresets(id), activePresetId: DialStore.getActivePresetId(id) });
   const presets = mountPresetManager(host, presetProps());
   const copy = button('Copy parameters', [ICON_CLIPBOARD_PLAIN.board, ICON_CLIPBOARD_PLAIN.body], async () => {
@@ -51,7 +49,6 @@ export function mountPanelToolbar(host: HTMLElement, id: string, hookName = 'cre
       clearTimeout(timer);
       stop();
       presets.destroy();
-      add.remove();
       copy.remove();
     }
   };

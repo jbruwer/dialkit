@@ -1,7 +1,7 @@
 import { buildCopyInstruction } from '../../copy-instruction';
 import { Fragment, computed, defineComponent, h, onMounted, onUnmounted, ref, type PropType, type VNodeChild } from 'vue';
 import { AnimatePresence, motion } from 'motion-v';
-import { ICON_PLUS, ICON_CHECK, ICON_CLIPBOARD_PLAIN } from '../../icons';
+import { ICON_CHECK, ICON_CLIPBOARD_PLAIN } from '../../icons';
 import { DialStore } from '../../store/DialStore';
 import type { DialValue, PanelConfig } from '../../store/DialStore';
 import { Folder } from './Folder';
@@ -59,11 +59,6 @@ export const Panel = defineComponent({
       }
     });
 
-    const handleAddPreset = () => {
-      const nextNum = presets.value.length + 2;
-      DialStore.savePreset(props.panel.id, `Version ${nextNum}`);
-    };
-
     const handleCopy = async () => {
       const instruction = buildCopyInstruction('useDialKit', props.panel.name, values.value);
 
@@ -86,31 +81,15 @@ export const Panel = defineComponent({
 
     return () => {
       const toolbarNode = h(Fragment, null, [
-        h(motion.button, {
-          class: 'dialkit-toolbar-add',
-          onClick: handleAddPreset,
-          title: 'Add preset',
-          whilePress: { scale: 0.9 },
-          transition: { type: 'spring', visualDuration: 0.15, bounce: 0.3 },
-        }, [
-          h('svg', {
-            viewBox: '0 0 24 24',
-            fill: 'none',
-            stroke: 'currentColor',
-            'stroke-width': '2.5',
-            'stroke-linecap': 'round',
-            'stroke-linejoin': 'round',
-          }, ICON_PLUS.map((d) => h('path', { d }))),
-        ]),
         h(PresetManager, {
           panelId: props.panel.id,
           presets: presets.value,
           activePresetId: activePresetId.value,
         }),
         h(motion.button, {
-          class: 'dialkit-toolbar-copy dialkit-toolbar-primary',
+          class: 'dialkit-toolbar-add dialkit-toolbar-primary',
           onClick: handleCopy,
-          title: 'Copy parameters',
+          title: 'Copy parameters', 'aria-label': 'Copy parameters',
           whilePress: { scale: 0.95 },
           transition: { type: 'spring', visualDuration: 0.15, bounce: 0.3 },
         }, [
@@ -164,7 +143,6 @@ export const Panel = defineComponent({
                 : [],
             }),
           ]),
-          'Copy',
         ]),
         props.toolbarExtra?.(),
       ]);

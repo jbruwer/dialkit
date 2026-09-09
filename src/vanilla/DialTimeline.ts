@@ -6,7 +6,7 @@ import { clamp } from '../transition-math';
 import { findControl } from '../shortcut-utils';
 import { getDropdownPosition } from '../dropdown-position';
 import { buildCopyInstruction } from '../copy-instruction';
-import { ICON_CHEVRON, ICON_PLAY, ICON_PAUSE, ICON_REPLAY, ICON_ADD_PRESET, ICON_CLIPBOARD, ICON_CHECK } from '../icons';
+import { ICON_CHEVRON, ICON_PLAY, ICON_PAUSE, ICON_REPLAY, ICON_CLIPBOARD_PLAIN, ICON_CHECK } from '../icons';
 import { mountControlRenderer } from './ControlRenderer';
 import { mountPresetManager } from './menus';
 import { element, icon, button } from './dom';
@@ -183,13 +183,12 @@ function mountSection(host: HTMLElement, initial: TimelineMeta, options: DialTim
     render();
     TimelineStore.replay(meta.id);
   });
-  const add = button('Add timeline version', ICON_ADD_PRESET, () => DialStore.savePreset(meta.id, `Version ${DialStore.getPresets(meta.id).length + 2}`));
-  actions.append(play, replay, add);
+  actions.append(play, replay);
   const presetProps = () => ({ panelId: meta.id, presets: DialStore.getPresets(meta.id), activePresetId: DialStore.getActivePresetId(meta.id) });
   const presets = mountPresetManager(actions, presetProps());
   let copyTimer: ReturnType<typeof setTimeout> | undefined;
   let destroyed = false;
-  const copy = button('Copy parameters', [ICON_CLIPBOARD.board, ICON_CLIPBOARD.body, ICON_CLIPBOARD.sparkle], async () => {
+  const copy = button('Copy parameters', [ICON_CLIPBOARD_PLAIN.board, ICON_CLIPBOARD_PLAIN.body], async () => {
     try {
       await navigator.clipboard.writeText(buildCopyInstruction('createDialTimeline', meta.name, normalizeTimelineValuesForCopy(DialStore.getValues(meta.id), meta.clips)));
     }
@@ -200,8 +199,9 @@ function mountSection(host: HTMLElement, initial: TimelineMeta, options: DialTim
       return;
     copy.replaceChildren(icon(ICON_CHECK));
     clearTimeout(copyTimer);
-    copyTimer = setTimeout(() => copy.replaceChildren(icon([ICON_CLIPBOARD.board, ICON_CLIPBOARD.body, ICON_CLIPBOARD.sparkle])), 1500);
+    copyTimer = setTimeout(() => copy.replaceChildren(icon([ICON_CLIPBOARD_PLAIN.board, ICON_CLIPBOARD_PLAIN.body])), 1500);
   });
+  copy.classList.add('dialkit-toolbar-primary');
   actions.append(copy);
   const collapse = element('button', 'dialkit-timeline-chevron');
   collapse.append(icon(ICON_CHEVRON));
