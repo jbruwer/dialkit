@@ -50,7 +50,7 @@ export function Folder(props: FolderProps) {
     chevronAnim?.stop();
     chevronAnim = animate(
       chevronRef,
-      { rotate: open ? 0 : 180 },
+      { rotate: open ? 180 : 0 },
       { type: 'spring', visualDuration: 0.35, bounce: 0.15 }
     );
   }, { defer: true }));
@@ -119,7 +119,7 @@ export function Folder(props: FolderProps) {
             stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"
-            style={{ transform: `rotate(${(props.open ?? props.defaultOpen ?? true) ? 0 : 180}deg)` }}
+            style={{ transform: `rotate(${(props.open ?? props.defaultOpen ?? true) ? 180 : 0}deg)` }}
           >
             <path d={ICON_CHEVRON} />
           </svg>

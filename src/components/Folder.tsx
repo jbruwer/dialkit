@@ -99,7 +99,7 @@ export function Folder({ title, children, open, defaultOpen = true, isRoot = fal
               strokeLinecap="round"
               strokeLinejoin="round"
               initial={false}
-              animate={{ rotate: isOpen ? 0 : 180 }}
+              animate={{ rotate: isOpen ? 180 : 0 }}
               transition={{ type: 'spring', visualDuration: 0.35, bounce: 0.15 }}
             >
               <path d={ICON_CHEVRON} />

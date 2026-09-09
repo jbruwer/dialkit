@@ -50,7 +50,7 @@
     return () => window.removeEventListener('resize', onResize);
   });
 
-  const chevronRotation = new Spring(initiallyOpen ? 0 : 180, { stiffness: 0.2, damping: 0.6 });
+  const chevronRotation = new Spring(initiallyOpen ? 180 : 0, { stiffness: 0.2, damping: 0.6 });
   const panelWidth = new Spring(initiallyOpen ? 280 : 42, { stiffness: 0.2, damping: 0.62 });
   const panelHeight = new Spring(initiallyOpen ? 220 : 42, { stiffness: 0.2, damping: 0.62 });
   const panelRadius = new Spring(initiallyOpen ? 14 : 21, { stiffness: 0.2, damping: 0.62 });
@@ -79,7 +79,7 @@
 
   $effect(() => {
     if (isRoot) return;
-    chevronRotation.set(isOpen ? 0 : 180);
+    chevronRotation.set(isOpen ? 180 : 0);
   });
 
   $effect(() => {

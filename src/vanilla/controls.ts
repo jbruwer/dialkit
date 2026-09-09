@@ -78,7 +78,7 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
           : { width: '42px', height: '42px', maxHeight: '42px', borderRadius: '50%', boxShadow: 'var(--dial-shadow-collapsed)', overflow: 'hidden', cursor: 'pointer' });
     }
     else {
-      glyph.style.transform = open ? '' : 'rotate(180deg)';
+      glyph.style.transform = open ? 'rotate(180deg)' : '';
       glyph.style.transition = 'transform 250ms ease';
     }
     if (changed && before.width > 0) {

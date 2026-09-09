@@ -109,7 +109,7 @@ export const Folder = defineComponent({
             'stroke-linecap': 'round',
             'stroke-linejoin': 'round',
             initial: false,
-            animate: { rotate: isOpen.value ? 0 : 180 },
+            animate: { rotate: isOpen.value ? 180 : 0 },
             transition: { type: 'spring', visualDuration: 0.35, bounce: 0.15 },
           }, [h('path', { d: ICON_CHEVRON })])
           : null,
