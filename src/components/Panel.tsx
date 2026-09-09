@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DialStore, PanelConfig } from '../store/DialStore';
 import { buildCopyInstruction } from '../copy-instruction';
-import { ICON_CLIPBOARD_PLAIN, ICON_CHECK, ICON_ADD_PRESET } from '../icons';
+import { ICON_CLIPBOARD_PLAIN, ICON_CHECK, ICON_PLUS } from '../icons';
 import { ControlRenderer } from './ControlRenderer';
 import { Folder } from './Folder';
 import { PresetManager } from './PresetManager';
@@ -82,7 +82,7 @@ export function Panel({ panel, defaultOpen = true, inline = false, onOpenChange,
         transition={{ type: 'spring', visualDuration: 0.15, bounce: 0.3 }}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          {ICON_ADD_PRESET.map((d, i) => (
+          {ICON_PLUS.map((d, i) => (
             <path key={i} d={d} />
           ))}
         </svg>

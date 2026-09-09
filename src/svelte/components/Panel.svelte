@@ -7,7 +7,7 @@
   import Folder from './Folder.svelte';
   import PresetManager from './PresetManager.svelte';
   import ControlRenderer from './ControlRenderer.svelte';
-  import { ICON_CLIPBOARD_PLAIN, ICON_CHECK, ICON_ADD_PRESET } from '../../icons';
+  import { ICON_CLIPBOARD_PLAIN, ICON_CHECK, ICON_PLUS } from '../../icons';
 
   let { panel, defaultOpen = true, inline = false, onOpenChange, variant = 'root', toolbarExtra } = $props<{
     panel: PanelConfig;
@@ -102,11 +102,7 @@
     style:transform={`scale(${addScale.current})`}
   >
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d={ICON_ADD_PRESET[0]} />
-      <path d={ICON_ADD_PRESET[1]} />
-      <path d={ICON_ADD_PRESET[2]} />
-      <path d={ICON_ADD_PRESET[3]} />
-      <path d={ICON_ADD_PRESET[4]} />
+      <path d={ICON_PLUS[0]} />
     </svg>
   </button>
 
