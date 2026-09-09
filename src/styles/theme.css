@@ -204,6 +204,11 @@
   cursor: grabbing;
 }
 
+.dialkit-panel:not([data-mode="inline"]) .dialkit-panel-inner:not([data-collapsed="true"]) .dialkit-panel-icon {
+  color: var(--dial-text-label);
+  opacity: 0.6;
+}
+
 .dialkit-panel:not([data-mode="inline"]) .dialkit-panel-icon {
   cursor: pointer;
 }
