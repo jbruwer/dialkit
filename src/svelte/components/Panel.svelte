@@ -139,9 +139,9 @@
 
 {#if variant === 'section'}
   <Folder title={panel.name} open={isOpen} onOpenChange={handleOpenChange}>
-    <div class="dialkit-panel-section-toolbar" onclick={(e) => e.stopPropagation()}>
+    {#snippet toolbar()}
       {@render panelToolbar()}
-    </div>
+    {/snippet}
     {@render panelControls()}
   </Folder>
 {:else}

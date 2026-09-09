@@ -152,12 +152,9 @@ export const Panel = defineComponent({
           title: props.panel.name,
           open: isOpen.value,
           onOpenChange: handleOpenChange,
+          toolbar: () => toolbarNode,
         }, {
           default: () => [
-            h('div', {
-              class: 'dialkit-panel-section-toolbar',
-              onClick: (event: Event) => event.stopPropagation(),
-            }, [toolbarNode]),
             h(ControlRenderer, { panelId: props.panel.id, controls: props.panel.controls, values: values.value }),
           ],
         });

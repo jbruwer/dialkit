@@ -1,6 +1,7 @@
 import { activateOnKey, handleSegmentKey, handleSliderKey, labelSegmentedControl } from '../control-keyboard';
 import { decimalsForStep, roundValue, snapToDecile, formatSliderShortcut, formatToggleShortcut } from '../shortcut-utils';
 import { observeTextSize } from '../text-autosize';
+import { createPanelSectionTransition, observePanelHeader } from '../panel-size';
 import { ICON_CLOSE, ICON_CHEVRON, ICON_PANEL } from '../icons';
 import type { ShortcutConfig } from '../store/DialStore';
 import { element, icon, svg, type Mounted } from './dom';
@@ -10,13 +11,14 @@ export interface FolderProps {
   defaultOpen?: boolean;
   open?: boolean;
   isRoot?: boolean;
+  isSection?: boolean;
   inline?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 export function mountFolder(host: HTMLElement, initial: FolderProps) {
   let props = initial;
   let open = props.open ?? props.defaultOpen ?? true;
-  const folder = element('div', `dialkit-folder${props.isRoot ? ' dialkit-folder-root' : ''}`);
+  const folder = element('div', `dialkit-folder${props.isRoot ? ' dialkit-folder-root' : props.isSection ? ' dialkit-folder-section' : ''}`);
   const header = element('div', `dialkit-folder-header${props.isRoot ? ' dialkit-panel-header' : ''}`);
   const top = element('div', 'dialkit-folder-header-top');
   const titleRow = element('div', 'dialkit-folder-title-row');
@@ -26,10 +28,14 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
   const glyph = props.isRoot ? svg('svg', { class: 'dialkit-panel-icon', viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true' }) : icon(ICON_CHEVRON, 'dialkit-folder-icon');
   if (!props.inline || !props.isRoot)
     top.append(glyph);
-  const toolbar = element('div', 'dialkit-panel-toolbar');
+  const toolbar = element('div', props.isRoot ? 'dialkit-panel-toolbar' : 'dialkit-panel-section-toolbar');
   toolbar.addEventListener('click', event => event.stopPropagation());
   header.append(top);
-  if (props.isRoot)
+  if (props.isSection) {
+    const toolbarClip = element('div', 'dialkit-panel-section-toolbar-clip');
+    toolbarClip.append(toolbar);
+    header.append(toolbarClip);
+  } else if (props.isRoot)
     header.append(toolbar);
   const content = element('div', 'dialkit-folder-content');
   const body = element('div', 'dialkit-folder-inner');
@@ -43,6 +49,7 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
   host.append(node);
   let renderedOpen = open;
   let animation: Animation | undefined;
+  let sectionTransition: ReturnType<typeof createPanelSectionTransition> | undefined;
   const render = () => {
     const changed = renderedOpen !== open;
     const before = (props.isRoot ? node : content).getBoundingClientRect();
@@ -58,8 +65,11 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
       top.setAttribute('role', 'button');
       top.tabIndex = 0;
     }
-    content.style.display = open ? '' : 'none';
-    content.inert = !open;
+    if (!props.isSection) {
+      content.style.display = open ? '' : 'none';
+      content.inert = !open;
+      toolbar.style.display = open ? '' : 'none';
+    }
     if (props.isRoot) {
       glyph.setAttribute('viewBox', open ? '0 0 24 24' : '0 0 16 16');
       glyph.replaceChildren();
@@ -69,7 +79,6 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
         glyph.append(svg('path', { d: ICON_PANEL.path, fill: 'currentColor', opacity: 0.5 }));
         ICON_PANEL.circles.forEach(c => glyph.append(svg('circle', { ...c, fill: 'currentColor', stroke: 'currentColor', 'stroke-width': 1.25 })));
       }
-      toolbar.style.display = open ? '' : 'none';
       titleRow.style.display = open ? '' : 'none';
       node.dataset.collapsed = String(!open);
       if (!props.inline)
@@ -87,10 +96,10 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
         node.style.maxHeight = 'calc(100dvh - 32px)';
         animation = animateSpring(node, p => ({ width: `${before.width + (after.width - before.width) * p}px`, height: `${before.height + (after.height - before.height) * p}px`, borderRadius: `${(wasOpen ? 14 : 21) + (open ? -7 : 7) * p}px` }));
       }
-      else if (!props.isRoot) {
+      else if (!props.isRoot && !props.isSection) {
         content.style.display = '';
         const targetHeight = open ? content.scrollHeight : 0;
-        animation = animateSpring(content, p => ({ height: `${before.height + (targetHeight - before.height) * p}px`, opacity: wasOpen ? 1 - p : p, clipPath: 'inset(0 -20px)' }));
+        animation = animateSpring(content, p => ({ height: `${before.height + (targetHeight - before.height) * p}px` }));
         if (!open) {
           if (animation)
             animation.onfinish = () => {
@@ -102,6 +111,7 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
         }
       }
     }
+    sectionTransition?.setOpen(open);
   };
   const toggle = () => {
     if (props.inline && props.isRoot)
@@ -121,6 +131,8 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
         toggle();
     });
   render();
+  if (props.isSection) sectionTransition = createPanelSectionTransition(folder, open);
+  const stopHeader = props.isRoot ? observePanelHeader(folder) : undefined;
   return {
     element: node, body, toolbar, update(next: FolderProps) {
       props = next;
@@ -128,6 +140,8 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
       render();
     }, destroy() {
       animation?.cancel();
+      stopHeader?.();
+      sectionTransition?.destroy();
       node.remove();
     }
   };

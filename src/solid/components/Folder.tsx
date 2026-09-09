@@ -4,6 +4,7 @@ import { animate } from 'motion';
 import { ICON_CHEVRON } from '../../icons';
 import type { AnimationHandle } from '../primitives';
 import { RootPanel } from './RootPanel';
+import { createPanelSectionTransition } from '../../panel-size';
 
 interface FolderProps {
   title: string;
@@ -15,7 +16,7 @@ interface FolderProps {
   isRoot?: boolean;
   /** @deprecated Only meaningful with isRoot. */
   inline?: boolean;
-  /** @deprecated Only meaningful with isRoot. */
+  /** Optional panel actions that stay with the section title while scrolling. */
   toolbar?: JSX.Element;
   /** @deprecated Only meaningful with isRoot. */
   panelHeightOffset?: number;
@@ -23,7 +24,7 @@ interface FolderProps {
 
 const sectionTransition = { type: 'spring' as const, visualDuration: 0.35, bounce: 0.1 };
 
-/** Collapsible section with animated height/opacity and rotating chevron. */
+/** Collapsible section with animated height and rotating chevron. */
 export function Folder(props: FolderProps) {
   // Root panels are a different component; delegate for old call sites.
   if (props.isRoot) {
@@ -32,6 +33,9 @@ export function Folder(props: FolderProps) {
 
   const [localOpen, setIsOpen] = createSignal(props.defaultOpen ?? true);
   const isOpen = () => props.open ?? localOpen();
+  const isSection = !!props.toolbar;
+  let folderRef: HTMLDivElement | undefined;
+  let panelTransition: ReturnType<typeof createPanelSectionTransition> | undefined;
   const [contentMounted, setContentMounted] = createSignal(props.open ?? props.defaultOpen ?? true);
   let skipFirstAnim = props.open ?? props.defaultOpen ?? true;
   let sectionContentRef: HTMLDivElement | undefined;
@@ -42,6 +46,13 @@ export function Folder(props: FolderProps) {
   onCleanup(() => {
     sectionAnim?.stop();
     chevronAnim?.stop();
+    panelTransition?.destroy();
+  });
+
+  createEffect(() => {
+    if (!isSection || !folderRef) return;
+    if (!panelTransition) panelTransition = createPanelSectionTransition(folderRef, isOpen());
+    else panelTransition.setOpen(isOpen());
   });
 
   // Chevron renders at its resting angle; only animate on changes.
@@ -56,6 +67,7 @@ export function Folder(props: FolderProps) {
   }, { defer: true }));
 
   createEffect(on(isOpen, (next) => {
+    if (isSection) return;
     if (next) {
       sectionAnim?.stop();
       sectionAnim = null;
@@ -63,7 +75,7 @@ export function Folder(props: FolderProps) {
         // If close was interrupted, animate the section back open.
         sectionAnim = animate(
           sectionContentRef,
-          { height: 'auto', opacity: 1 },
+          { height: 'auto' },
           {
             ...sectionTransition,
             onComplete: () => {
@@ -81,7 +93,7 @@ export function Folder(props: FolderProps) {
       sectionAnim?.stop();
       sectionAnim = animate(
         sectionContentRef,
-        { height: 0, opacity: 0 },
+        { height: 0 },
         {
           ...sectionTransition,
           onComplete: () => {
@@ -103,7 +115,7 @@ export function Folder(props: FolderProps) {
   };
 
   return (
-    <div class="dialkit-folder" data-open={String(isOpen())}>
+    <div ref={folderRef} class={`dialkit-folder${props.toolbar ? ' dialkit-folder-section' : ''}`} data-open={String(isOpen())}>
       <div class="dialkit-folder-header" onClick={handleToggle}>
         <div class="dialkit-folder-header-top" role={false ? undefined : "button"} tabIndex={false ? undefined : 0} aria-label={props.title} aria-expanded={isOpen()} onKeyDown={(e) => activateOnKey(e, handleToggle)}>
           <div class="dialkit-folder-title-row">
@@ -124,12 +136,18 @@ export function Folder(props: FolderProps) {
             <path d={ICON_CHEVRON} />
           </svg>
         </div>
+        <Show when={props.toolbar}>
+          <div class="dialkit-panel-section-toolbar-clip">
+            <div class="dialkit-panel-section-toolbar" onClick={(e) => e.stopPropagation()}>{props.toolbar}</div>
+          </div>
+        </Show>
       </div>
 
-      <Show when={contentMounted()}>
+      <Show when={isSection || contentMounted()}>
         <div
           ref={(el) => {
             sectionContentRef = el;
+            if (isSection) return;
             if (skipFirstAnim) {
               skipFirstAnim = false;
               return;
@@ -137,10 +155,9 @@ export function Folder(props: FolderProps) {
 
             sectionAnim?.stop();
             el.style.height = '0px';
-            el.style.opacity = '0';
             sectionAnim = animate(
               el,
-              { height: 'auto', opacity: 1 },
+              { height: 'auto' },
               {
                 ...sectionTransition,
                 onComplete: () => {
@@ -150,7 +167,6 @@ export function Folder(props: FolderProps) {
             );
           }}
           class="dialkit-folder-content"
-          style={{ 'clip-path': 'inset(0 -20px)' }}
         >
           <div class="dialkit-folder-inner">{props.children}</div>
         </div>

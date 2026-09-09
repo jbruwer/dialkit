@@ -1,4 +1,15 @@
 import type { TransitionConfig } from 'svelte/transition';
+import { cubicOut } from 'svelte/easing';
+
+/** Fold the content without fading its controls or retaining scroll overflow. */
+export function folderTransition(node: HTMLElement): TransitionConfig {
+  const height = node.offsetHeight;
+  return {
+    duration: 220,
+    easing: cubicOut,
+    css: (t) => `height:${t * height}px;overflow-y:clip;`,
+  };
+}
 
 export function dropdownTransition(node: Element, params?: { above?: boolean; duration?: number }): TransitionConfig {
   const above = params?.above ?? false;

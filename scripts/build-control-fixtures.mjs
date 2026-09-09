@@ -6,7 +6,10 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 const out = resolve('example/public/control-fixtures');
 await mkdir(out, { recursive: true });
-const config = JSON.stringify({ transition: { type: 'easing', duration: 0.5, ease: [0.25, -0.6, 0.6, 1.6] }, run: { type: 'action' }, emptyChoice: { type: 'select', options: [] }, position: { type: 'pad', x: [0.25, -1, 1, 0.01], y: [-0.5, -1, 1, 0.01] }, cover: { type: 'image', options: [{ value: '/photos/one.avif', label: 'Photo 01' }, { value: '/photos/two.avif', label: 'Photo 02' }, { value: '/photos/three.avif', label: 'Photo 03' }, { value: '/photos/four.avif', label: 'Photo 04' }] }, uploadOnly: { type: 'image' }, accent: 'oklch(0.65 0.18 285 / 0.6)', choices: { type: 'select', options: Array.from({ length: 40 }, (_, i) => `Option ${i + 1}`) }, radius: [12, 0, 32], precise: [0.25, 0.05, 1.05, 0.1], title: { type: 'text', default: 'Example' }, notes: { type: 'text', default: 'Saved note.\nContinue here.', placeholder: 'Add some notes…' }, Details: { _collapsed: true, enabled: true, caption: { type: 'text', default: 'Example' }, firstAction: { type: 'action' }, secondAction: { type: 'action' } } });
+const baseConfig = JSON.stringify({ transition: { type: 'easing', duration: 0.5, ease: [0.25, -0.6, 0.6, 1.6] }, run: { type: 'action' }, emptyChoice: { type: 'select', options: [] }, position: { type: 'pad', x: [0.25, -1, 1, 0.01], y: [-0.5, -1, 1, 0.01] }, cover: { type: 'image', options: [{ value: '/photos/one.avif', label: 'Photo 01' }, { value: '/photos/two.avif', label: 'Photo 02' }, { value: '/photos/three.avif', label: 'Photo 03' }, { value: '/photos/four.avif', label: 'Photo 04' }] }, uploadOnly: { type: 'image' }, accent: 'oklch(0.65 0.18 285 / 0.6)', choices: { type: 'select', options: Array.from({ length: 40 }, (_, i) => `Option ${i + 1}`) }, radius: [12, 0, 32], precise: [0.25, 0.05, 1.05, 0.1], title: { type: 'text', default: 'Example' }, notes: { type: 'text', default: 'Saved note.\nContinue here.', placeholder: 'Add some notes…' }, Details: { _collapsed: true, enabled: true, caption: { type: 'text', default: 'Example' }, firstAction: { type: 'action' }, secondAction: { type: 'action' } } });
+// Add enough rows to exercise sticky headers and the handoff between panels.
+const scrollConfig = `Object.fromEntries(Array.from({length:32},(_,i)=>['Test slider '+(i+1),[50,0,100]]))`;
+const config = `({...${baseConfig}, ...(new URLSearchParams(location.search).has('scroll') ? ${scrollConfig} : {})})`;
 const sources = {
   vanilla: `import {createDialKit,createDialRoot,mountShortcutsMenu} from 'dialkit/vanilla';
     const kit=createDialKit('Vanilla',${config},{id:'fixture',defaultCollapsed:true,onAction:action=>{document.querySelector('[data-action]').textContent=action},shortcuts:{radius:{key:'r'}}});
@@ -27,7 +30,7 @@ const sources = {
 };
 for (const [framework, original] of Object.entries(sources)) {
   const entryName = framework === 'react' ? 'dialkit' : `dialkit/${framework}`;
-  const extra = `import {DialStore} from '${entryName}'; if(new URLSearchParams(location.search).has('multiple')) DialStore.registerPanel('second','Second panel',{speed:1});`;
+  const extra = `import {DialStore} from '${entryName}'; if(new URLSearchParams(location.search).has('multiple')) DialStore.registerPanel('second','Second panel',{speed:1,...(new URLSearchParams(location.search).has('scroll') ? ${scrollConfig} : {})});`;
   const source = framework === 'svelte' ? original.replace('<script>', '<script>' + extra) : extra + original;
   const entry = resolve(out, `${framework}.${framework === 'svelte' ? 'svelte' : 'tsx'}`);
   await writeFile(entry, source);

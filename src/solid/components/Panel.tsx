@@ -153,10 +153,7 @@ export function Panel(props: PanelProps) {
 
   if (props.variant === 'section') {
     return (
-      <Folder title={props.panel.name} open={isOpen()} onOpenChange={handleOpenChange}>
-        <div class="dialkit-panel-section-toolbar" onClick={(e) => e.stopPropagation()}>
-          {toolbar}
-        </div>
+      <Folder title={props.panel.name} open={isOpen()} onOpenChange={handleOpenChange} toolbar={toolbar}>
         <ControlRenderer panelId={props.panel.id} controls={props.panel.controls} values={values()} />
       </Folder>
     );

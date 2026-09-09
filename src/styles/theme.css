@@ -130,13 +130,47 @@
 .dialkit-panel-inner {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  overflow-anchor: none;
+}
+
+.dialkit-panel-inner[data-folding="true"]:not(.dialkit-panel-inline) {
+  height: var(--dial-panel-fold-height) !important;
+}
+
+/* Put the top inset inside the sticky header so it never scrolls away. */
+.dialkit-panel-inner:not([data-collapsed="true"]) {
+  padding-top: 0;
+}
+
+.dialkit-panel-inner:not([data-collapsed="true"]) > .dialkit-folder-root > .dialkit-panel-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding-top: 10px;
+  background: var(--dial-glass-bg);
+}
+
+/* Cover the side gutters too, including when a section pushes its header up. */
+.dialkit-panel-inner:not([data-collapsed="true"]) > .dialkit-folder-root > .dialkit-panel-header::before,
+.dialkit-folder-section > .dialkit-folder-header::before {
+  content: '';
+  position: absolute;
+  inset: 0 -12px;
+  z-index: -1;
+  background: var(--dial-glass-bg);
+  pointer-events: none;
+}
+
+.dialkit-panel-inner:not([data-collapsed="true"]) > .dialkit-folder-root > .dialkit-panel-header .dialkit-panel-icon {
+  right: 0;
 }
 
 .dialkit-panel-inline {
   width: 100%;
   height: auto;
   max-height: inherit;
-  overflow-y: auto;
+  /* Use the host's scroll container so sticky headers also work when embedded. */
+  overflow: visible;
   box-shadow: none;
   border-radius: 0;
   border: none;
@@ -293,6 +327,12 @@
   will-change: transform;
 }
 
+/* Clip layout overflow as well as paint while a folder folds. A clip-path alone
+   leaves its full contents in the outer scroll range until they unmount. */
+.dialkit-folder:not(.dialkit-folder-root) > .dialkit-folder-content {
+  overflow-y: clip;
+}
+
 .dialkit-folder-inner {
   display: flex;
   flex-direction: column;
@@ -351,6 +391,7 @@
 }
 
 .dialkit-panel[data-multiple="true"] .dialkit-folder-root > .dialkit-panel-header {
+  padding-top: 0;
   padding-bottom: 0;
   margin-bottom: 0;
 }
@@ -362,7 +403,7 @@
 }
 
 .dialkit-panel[data-multiple="true"] .dialkit-folder-root > .dialkit-folder-content > .dialkit-folder-inner > .dialkit-folder > .dialkit-folder-header {
-  height: 44px;
+  height: auto;
 }
 
 .dialkit-panel[data-multiple="true"] .dialkit-folder-root > .dialkit-folder-content > .dialkit-folder-inner {
@@ -398,8 +439,45 @@
 }
 
 .dialkit-panel[data-multiple="true"] .dialkit-folder-root > .dialkit-folder-content > .dialkit-folder-inner > .dialkit-folder > .dialkit-folder-content > .dialkit-folder-inner {
-  padding-top: 4px;
+  padding-top: 0;
   padding-bottom: 12px;
+}
+
+/* Only registered panels stick; ordinary folders remain part of the content. */
+.dialkit-panel .dialkit-folder.dialkit-folder-section > .dialkit-folder-header {
+  position: sticky;
+  top: var(--dial-panel-header-height, 0px);
+  z-index: 2;
+  height: auto;
+  background: var(--dial-glass-bg);
+}
+
+.dialkit-folder-section {
+  --dial-section-header-height: calc(44px + var(--dial-row-height) + 10px);
+}
+
+/* Keyboard navigation must reveal controls below both pinned header rows. */
+.dialkit-folder-inner :is(button, input, textarea, [tabindex]) {
+  scroll-margin-top: calc(var(--dial-panel-header-height, 0px) + var(--dial-section-header-height, 0px) + var(--dial-row-gap));
+}
+
+.dialkit-folder.dialkit-folder-section > .dialkit-folder-header > .dialkit-folder-header-top {
+  height: var(--dial-row-height);
+}
+
+.dialkit-panel-section-toolbar-clip {
+  overflow-y: clip;
+}
+
+.dialkit-folder-section > .dialkit-folder-header > .dialkit-panel-section-toolbar-clip > .dialkit-panel-section-toolbar {
+  padding-top: 4px;
+  padding-bottom: var(--dial-row-gap);
+  box-sizing: content-box;
+}
+
+.dialkit-panel-toolbar:empty,
+.dialkit-panel-section-toolbar:empty {
+  display: none;
 }
 
 /* Content spacing handled by folder-inner gap */

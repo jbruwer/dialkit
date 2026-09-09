@@ -1,5 +1,5 @@
 import { activateOnKey } from '../../control-keyboard';
-import { measurePanelHeight } from '../../panel-size';
+import { measurePanelHeight, observePanelHeader } from '../../panel-size';
 import { createSignal, createEffect, on, onCleanup, untrack, Show, JSX } from 'solid-js';
 import { isServer } from 'solid-js/web';
 import { animate } from 'motion';
@@ -34,6 +34,10 @@ export function RootPanel(props: RootPanelProps) {
   const [contentHeight, setContentHeight] = createSignal<number | undefined>(undefined);
   const [windowHeight, setWindowHeight] = createSignal(isServer ? 800 : window.innerHeight);
   let folderRef: HTMLDivElement | undefined;
+
+  createEffect(() => {
+    if (folderRef) onCleanup(observePanelHeader(folderRef));
+  });
 
   const handleToggle = () => {
     if (inline) return;

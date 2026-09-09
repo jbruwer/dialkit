@@ -1,6 +1,6 @@
 import { activateOnKey } from '../control-keyboard';
-import { measurePanelHeight } from '../panel-size';
-import { useState, useRef, useEffect, ReactNode } from 'react';
+import { createPanelSectionTransition, measurePanelHeight, observePanelHeader } from '../panel-size';
+import { useState, useRef, useEffect, useLayoutEffect, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ICON_CLOSE, ICON_PANEL, ICON_CHEVRON } from '../icons';
 
@@ -21,8 +21,20 @@ export function Folder({ title, children, open, defaultOpen = true, isRoot = fal
   const isOpen = open ?? localOpen;
   const isCollapsed = !isOpen;
   const contentRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const sectionTransition = useRef<ReturnType<typeof createPanelSectionTransition> | null>(null);
+  const isSection = !isRoot && !!toolbar;
   const [contentHeight, setContentHeight] = useState<number | undefined>(undefined);
   const [windowHeight, setWindowHeight] = useState(typeof window !== 'undefined' ? window.innerHeight : 800);
+
+  useLayoutEffect(() => {
+    if (!isSection || !sectionRef.current) return;
+    const transition = createPanelSectionTransition(sectionRef.current, isOpen);
+    sectionTransition.current = transition;
+    return () => { transition.destroy(); sectionTransition.current = null; };
+  }, [isSection]);
+
+  useLayoutEffect(() => { sectionTransition.current?.setOpen(isOpen); }, [isOpen]);
 
   useEffect(() => {
     if (!isRoot) return;
@@ -35,6 +47,7 @@ export function Folder({ title, children, open, defaultOpen = true, isRoot = fal
   useEffect(() => {
     const el = contentRef.current;
     if (!el) return;
+    const stopHeader = observePanelHeader(el);
     const ro = new ResizeObserver(() => {
       if (isOpen) {
         const h = measurePanelHeight(el);
@@ -42,7 +55,7 @@ export function Folder({ title, children, open, defaultOpen = true, isRoot = fal
       }
     });
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => { ro.disconnect(); stopHeader(); };
   }, [isOpen]);
 
   const handleToggle = () => {
@@ -54,8 +67,8 @@ export function Folder({ title, children, open, defaultOpen = true, isRoot = fal
 
   const folderContent = (
     <div
-      ref={isRoot ? contentRef : undefined}
-      className={`dialkit-folder ${isRoot ? 'dialkit-folder-root' : ''}`}
+      ref={isRoot ? contentRef : isSection ? sectionRef : undefined}
+      className={`dialkit-folder ${isRoot ? 'dialkit-folder-root' : toolbar ? 'dialkit-folder-section' : ''}`}
       data-open={String(isOpen)}
     >
       <div className={`dialkit-folder-header ${isRoot ? 'dialkit-panel-header' : ''}`} onClick={handleToggle}>
@@ -107,27 +120,32 @@ export function Folder({ title, children, open, defaultOpen = true, isRoot = fal
           )}
         </div>
 
-        {isRoot && toolbar && isOpen && (
-          <div className="dialkit-panel-toolbar" onClick={(e) => e.stopPropagation()}>
-            {toolbar}
+        {isSection ? (
+          <div className="dialkit-panel-section-toolbar-clip">
+            <div className="dialkit-panel-section-toolbar" onClick={(e) => e.stopPropagation()}>{toolbar}</div>
           </div>
-        )}
+        ) : toolbar && isOpen ? (
+          <div className="dialkit-panel-toolbar" onClick={(e) => e.stopPropagation()}>{toolbar}</div>
+        ) : null}
       </div>
 
-      <AnimatePresence initial={false}>
+      {isSection ? (
+        <div className="dialkit-folder-content">
+          <div className="dialkit-folder-inner">{children}</div>
+        </div>
+      ) : <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             className="dialkit-folder-content"
-            initial={isRoot ? undefined : { height: 0, opacity: 0 }}
-            animate={isRoot ? undefined : { height: 'auto', opacity: 1 }}
-            exit={isRoot ? undefined : { height: 0, opacity: 0 }}
+            initial={isRoot ? undefined : { height: 0 }}
+            animate={isRoot ? undefined : { height: 'auto' }}
+            exit={isRoot ? undefined : { height: 0 }}
             transition={isRoot ? undefined : { type: 'spring', visualDuration: 0.35, bounce: 0.1 }}
-            style={isRoot ? undefined : { clipPath: 'inset(0 -20px)' }}
           >
             <div className="dialkit-folder-inner">{children}</div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>}
     </div>
   );
 

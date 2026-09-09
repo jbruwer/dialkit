@@ -127,10 +127,7 @@ export function Panel({ panel, defaultOpen = true, inline = false, onOpenChange,
 
   if (variant === 'section') {
     return (
-      <Folder title={panel.name} open={isOpen} onOpenChange={handleOpenChange}>
-        <div className="dialkit-panel-section-toolbar" onClick={(e) => e.stopPropagation()}>
-          {toolbar}
-        </div>
+      <Folder title={panel.name} open={isOpen} onOpenChange={handleOpenChange} toolbar={toolbar}>
         {renderControls()}
       </Folder>
     );

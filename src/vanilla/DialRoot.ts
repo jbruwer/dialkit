@@ -111,16 +111,14 @@ export function createDialRoot(options: DialRootOptions = {}) {
   function panelView(panel: PanelConfig, host: HTMLElement, isRoot: boolean) {
     DialStore.initPanelOpen(panel.id, isRoot ? inline || (options.defaultOpen ?? true) : true);
     const folderProps = () => ({
-      title: DialStore.getPanel(panel.id)?.name ?? panel.name, open: DialStore.getPanelOpen(panel.id), isRoot, inline: isRoot && inline, onOpenChange: (open: boolean) => {
+      title: DialStore.getPanel(panel.id)?.name ?? panel.name, open: DialStore.getPanelOpen(panel.id), isRoot, isSection: !isRoot, inline: isRoot && inline, onOpenChange: (open: boolean) => {
         DialStore.setPanelOpen(panel.id, open);
         if (isRoot)
           notify(open);
       }
     });
     const folder = mountFolder(host, folderProps());
-    const toolbar = isRoot ? folder.toolbar : element('div', 'dialkit-panel-section-toolbar');
-    if (!isRoot)
-      folder.body.append(toolbar);
+    const toolbar = folder.toolbar;
     const toolbarView = mountPanelToolbar(toolbar, panel.id);
     if (isRoot)
       timelineToggle(toolbar);

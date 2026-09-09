@@ -1,11 +1,11 @@
 <script lang="ts">
   import { activateOnKey } from '../../control-keyboard';
 
-  import { measurePanelHeight } from '../../panel-size';
+  import { createPanelSectionTransition, measurePanelHeight, observePanelHeader } from '../../panel-size';
 
   import { Spring } from 'svelte/motion';
   import { untrack } from 'svelte';
-  import { slide } from 'svelte/transition';
+  import { folderTransition } from './transitions';
 
   import type { Snippet } from 'svelte';
   import { ICON_CLOSE, ICON_PANEL, ICON_CHEVRON } from '../../icons';
@@ -41,6 +41,16 @@
 
   let contentRef: HTMLDivElement | undefined;
   let panelRef: HTMLDivElement | undefined;
+  let sectionRef = $state<HTMLDivElement>();
+  let sectionTransition = $state<ReturnType<typeof createPanelSectionTransition>>();
+
+  $effect(() => {
+    if (!sectionRef || !toolbar || isRoot) return;
+    const transition = createPanelSectionTransition(sectionRef, untrack(() => isOpen));
+    sectionTransition = transition;
+    return () => { transition.destroy(); sectionTransition = undefined; };
+  });
+  $effect(() => { sectionTransition?.setOpen(isOpen); });
   let windowHeight = $state(typeof window !== 'undefined' ? window.innerHeight : 800);
 
   $effect(() => {
@@ -58,6 +68,7 @@
 
   $effect(() => {
     if (!isRoot || !contentRef || typeof ResizeObserver === 'undefined') return;
+    const stopHeader = observePanelHeader(contentRef);
 
     const ro = new ResizeObserver(() => {
       if (!isOpen) return;
@@ -74,6 +85,7 @@
 
     return () => {
       ro.disconnect();
+      stopHeader();
     };
   });
 
@@ -90,7 +102,10 @@
     const springOptions = !hasInitializedRootSize && isOpen ? { instant: true } : undefined;
 
     panelWidth.set(isOpen ? 280 : 42, springOptions);
-    panelHeight.set(nextHeight, springOptions);
+    // Child folders already animate their height; the open shell should follow
+    // that size directly instead of trailing it with a second spring.
+    const followContent = isOpen && untrack(() => panelWidth.current === 280);
+    panelHeight.set(nextHeight, followContent ? { instant: true } : springOptions);
     panelRadius.set(isOpen ? 14 : 21, springOptions);
 
     if (isOpen || !initiallyOpen) {
@@ -205,7 +220,7 @@
     </div>
   </div>
 {:else}
-  <div class="dialkit-folder" data-open={String(isOpen)}>
+  <div bind:this={sectionRef} class:dialkit-folder-section={!!toolbar} class="dialkit-folder" data-open={String(isOpen)}>
     <div class="dialkit-folder-header" onclick={handleToggle}>
       <div class="dialkit-folder-header-top" role="button" tabindex="0" aria-label={title} aria-expanded={isOpen} onkeydown={(e) => activateOnKey(e, handleToggle)}>
         <div class="dialkit-folder-title-row">
@@ -225,10 +240,21 @@
           <path d={ICON_CHEVRON} />
         </svg>
       </div>
+      {#if toolbar}
+        <div class="dialkit-panel-section-toolbar-clip">
+          <div class="dialkit-panel-section-toolbar" onclick={(e) => e.stopPropagation()}>{@render toolbar()}</div>
+        </div>
+      {/if}
     </div>
 
-    {#if isOpen}
-      <div class="dialkit-folder-content" style="clip-path: inset(0 -20px);" transition:slide={{ duration: 220 }}>
+    {#if toolbar}
+      <div class="dialkit-folder-content">
+        <div class="dialkit-folder-inner">
+          {#if children}{@render children()}{/if}
+        </div>
+      </div>
+    {:else if isOpen}
+      <div class="dialkit-folder-content" transition:folderTransition>
         <div class="dialkit-folder-inner">
           {#if children}{@render children()}{/if}
         </div>

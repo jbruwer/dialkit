@@ -1,6 +1,6 @@
 import { activateOnKey } from '../../control-keyboard';
-import { measurePanelHeight } from '../../panel-size';
-import { computed, defineComponent, h, onMounted, onUnmounted, ref, type PropType, type VNodeChild } from 'vue';
+import { createPanelSectionTransition, measurePanelHeight, observePanelHeader } from '../../panel-size';
+import { computed, defineComponent, h, onMounted, onUnmounted, ref, watch, type PropType, type VNodeChild } from 'vue';
 import { AnimatePresence, motion } from 'motion-v';
 import { ICON_CLOSE, ICON_CHEVRON, ICON_PANEL } from '../../icons';
 
@@ -28,6 +28,14 @@ export const Folder = defineComponent({
     const isOpen = computed(() => props.open ?? localOpen.value);
     const isCollapsed = computed(() => !isOpen.value);
     const contentRef = ref<HTMLElement | null>(null);
+    const sectionRef = ref<HTMLElement | null>(null);
+    let sectionTransition: ReturnType<typeof createPanelSectionTransition> | undefined;
+
+    onMounted(() => {
+      if (sectionRef.value) sectionTransition = createPanelSectionTransition(sectionRef.value, isOpen.value);
+    });
+    watch(isOpen, open => sectionTransition?.setOpen(open), { flush: 'post' });
+    onUnmounted(() => sectionTransition?.destroy());
     const contentHeight = ref<number | undefined>(undefined);
     const windowHeight = ref(typeof window !== 'undefined' ? window.innerHeight : 800);
 
@@ -49,11 +57,13 @@ export const Folder = defineComponent({
     };
 
     let ro: ResizeObserver | null = null;
+    let stopHeader: (() => void) | undefined;
 
     onMounted(() => {
       if (!props.isRoot || typeof ResizeObserver === 'undefined') return;
       const el = contentRef.value;
       if (!el) return;
+      stopHeader = observePanelHeader(el);
 
       ro = new ResizeObserver(() => {
         if (isOpen.value) {
@@ -73,6 +83,7 @@ export const Folder = defineComponent({
 
     onUnmounted(() => {
       ro?.disconnect();
+      stopHeader?.();
     });
 
     const renderHeader = () => h('div', {
@@ -114,7 +125,11 @@ export const Folder = defineComponent({
           }, [h('path', { d: ICON_CHEVRON })])
           : null,
       ]),
-      props.isRoot && props.toolbar && isOpen.value
+      props.toolbar && !props.isRoot
+        ? h('div', { class: 'dialkit-panel-section-toolbar-clip' }, [
+          h('div', { class: 'dialkit-panel-section-toolbar', onClick: (event: Event) => event.stopPropagation() }, [props.toolbar()]),
+        ])
+        : props.toolbar && isOpen.value
         ? h('div', { class: 'dialkit-panel-toolbar', onClick: (event: Event) => event.stopPropagation() }, [props.toolbar()])
         : null,
     ]);
@@ -122,6 +137,7 @@ export const Folder = defineComponent({
     const renderChildren = () => h('div', { class: 'dialkit-folder-inner' }, slots.default ? slots.default() : []);
 
     const renderContent = () => {
+      if (!props.isRoot && props.toolbar) return h('div', { class: 'dialkit-folder-content' }, [renderChildren()]);
       if (props.isRoot) {
         return isOpen.value
           ? h('div', { class: 'dialkit-folder-content' }, [renderChildren()])
@@ -133,19 +149,18 @@ export const Folder = defineComponent({
           ? [h(motion.div, {
             key: 'dialkit-folder-content',
             class: 'dialkit-folder-content',
-            initial: { height: 0, opacity: 0 },
-            animate: { height: 'auto', opacity: 1 },
-            exit: { height: 0, opacity: 0 },
+            initial: { height: 0 },
+            animate: { height: 'auto' },
+            exit: { height: 0 },
             transition: { type: 'spring', visualDuration: 0.35, bounce: 0.1 },
-            style: { clipPath: 'inset(0 -20px)' },
           }, [renderChildren()])]
           : [],
       });
     };
 
     const folderContent = () => h('div', {
-      ref: props.isRoot ? contentRef : undefined,
-      class: `dialkit-folder ${props.isRoot ? 'dialkit-folder-root' : ''}`,
+      ref: props.isRoot ? contentRef : props.toolbar ? sectionRef : undefined,
+      class: `dialkit-folder ${props.isRoot ? 'dialkit-folder-root' : props.toolbar ? 'dialkit-folder-section' : ''}`,
       'data-open': String(isOpen.value),
     }, [
       renderHeader(),
