@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DialStore, PanelConfig } from '../store/DialStore';
 import { buildCopyInstruction } from '../copy-instruction';
-import { ICON_CLIPBOARD, ICON_CHECK, ICON_ADD_PRESET } from '../icons';
+import { ICON_CLIPBOARD_PLAIN, ICON_CHECK, ICON_ADD_PRESET } from '../icons';
 import { ControlRenderer } from './ControlRenderer';
 import { Folder } from './Folder';
 import { PresetManager } from './PresetManager';
@@ -132,9 +132,8 @@ export function Panel({ panel, defaultOpen = true, inline = false, onOpenChange,
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ duration: 0.08 }}
               >
-                <path d={ICON_CLIPBOARD.board} stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-                <path d={ICON_CLIPBOARD.sparkle} fill="currentColor"/>
-                <path d={ICON_CLIPBOARD.body} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d={ICON_CLIPBOARD_PLAIN.board} stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                <path d={ICON_CLIPBOARD_PLAIN.body} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </motion.svg>
             )}
           </AnimatePresence>

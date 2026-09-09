@@ -7,7 +7,7 @@
   import Folder from './Folder.svelte';
   import PresetManager from './PresetManager.svelte';
   import ControlRenderer from './ControlRenderer.svelte';
-  import { ICON_CLIPBOARD, ICON_CHECK, ICON_ADD_PRESET } from '../../icons';
+  import { ICON_CLIPBOARD_PLAIN, ICON_CHECK, ICON_ADD_PRESET } from '../../icons';
 
   let { panel, defaultOpen = true, inline = false, onOpenChange, variant = 'root', toolbarExtra } = $props<{
     panel: PanelConfig;
@@ -131,9 +131,8 @@
         style:transform={`scale(${clipboardScale.current})`}
         style:filter={`blur(${(1 - clipboardOpacity.current) * 4}px)`}
       >
-        <path d={ICON_CLIPBOARD.board} stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        <path d={ICON_CLIPBOARD.sparkle} fill="currentColor"/>
-        <path d={ICON_CLIPBOARD.body} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d={ICON_CLIPBOARD_PLAIN.board} stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d={ICON_CLIPBOARD_PLAIN.body} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
 
       <svg

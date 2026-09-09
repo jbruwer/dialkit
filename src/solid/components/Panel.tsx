@@ -1,7 +1,7 @@
 import { buildCopyInstruction } from '../../copy-instruction';
 import { batch, createSignal, createEffect, on, onMount, onCleanup, type JSX } from 'solid-js';
 import { animate } from 'motion';
-import { ICON_CLIPBOARD, ICON_CHECK, ICON_ADD_PRESET } from '../../icons';
+import { ICON_CLIPBOARD_PLAIN, ICON_CHECK, ICON_ADD_PRESET } from '../../icons';
 import { DialStore } from '../../store/DialStore';
 import type { PanelConfig, DialValue } from '../../store/DialStore';
 import type { AnimationHandle } from '../primitives';
@@ -170,9 +170,8 @@ export function Panel(props: PanelProps) {
             style={{ opacity: 1, transform: 'scale(1)', filter: 'blur(0px)', 'transform-origin': '50% 50%' }}
           >
             <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-              <path d={ICON_CLIPBOARD.board} stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
-              <path d={ICON_CLIPBOARD.sparkle} fill="currentColor" />
-              <path d={ICON_CLIPBOARD.body} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d={ICON_CLIPBOARD_PLAIN.board} stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+              <path d={ICON_CLIPBOARD_PLAIN.body} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </span>
           <span
