@@ -60,7 +60,8 @@ try {
   assert.equal(await page.getByRole('status', { name: 'Last action' }).textContent(), 'actions.replay');
   await page.evaluate(() => window.demo.timeline.pause());
   // Presets keep their edits while the base version remains independent.
-  await page.getByRole('button', { name: 'Add preset', exact: true }).click();
+  await page.getByRole('button', { name: 'Versions', exact: true }).first().click();
+  await page.getByRole('menuitem', { name: 'New version', exact: true }).click();
   await page.evaluate(() => window.demo.kit.setValue('radius', 50));
   await page.getByRole('button', { name: 'Versions', exact: true }).first().click();
   await page.getByRole('menuitemradio', { name: 'Version 1', exact: true }).click();

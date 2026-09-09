@@ -42,3 +42,6 @@ example/src/vite-env.d.ts
 .claude-plan.md
 CLAUDE.md
 AGENTS.md
+
+# Generated adapter browser fixtures
+.toolbar-fixtures/

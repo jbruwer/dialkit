@@ -8,6 +8,12 @@ Thanks for contributing.
 2. Install dependencies with `npm i`.
 3. Run `npm run typecheck` and `npm run build` before opening a PR.
 
+## Toolbar browser checks
+
+After `npm run build`, run `node scripts/build-toolbar-fixtures.mjs` and serve `.toolbar-fixtures` on port 3011 (for example, `python3 -m http.server 3011 --directory .toolbar-fixtures`). The fixtures cover panels and timelines in all five frameworks; append `?theme=dark` to inspect dark mode.
+
+With Playwright and Chrome installed, run `node scripts/test-toolbar-browser.mjs` to check version creation, selection, deletion, numbering, and keyboard focus. `DIALKIT_PLAYWRIGHT` can point to an existing Playwright installation, and `DIALKIT_FIXTURE_URL` overrides the server URL.
+
 ## Project notes
 
 - `src/styles/theme.css` is copied to `dist/styles.css` during build via `tsup` `onSuccess`.
