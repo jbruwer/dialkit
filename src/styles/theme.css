@@ -1400,6 +1400,10 @@
   transition: background 0.15s;
 }
 
+.dialkit-preset-item + .dialkit-preset-item {
+  margin-top: 2px;
+}
+
 .dialkit-preset-item:hover {
   background: var(--dial-surface-hover);
 }
