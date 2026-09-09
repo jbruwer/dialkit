@@ -1,3 +1,4 @@
+import { untrack } from 'svelte';
 import { DialStore } from 'dialkit/store';
 import {
   TimelineStore,
@@ -44,38 +45,44 @@ export function createDialTimeline<T extends TimelineConfig>(
 
   $effect(() => {
     const currentParsed = parsed;
-    DialStore.registerPanel(panelId, name, currentParsed.dialConfig, undefined, {
-      retainOnUnmount: hasStableId,
-      persist: options?.persist,
-      kind: 'timeline',
-    });
-    flatValues = DialStore.getValues(panelId);
-    const initialStatic = computeStaticTimeline(currentParsed, flatValues);
-    TimelineStore.register(
-      buildTimelineMeta(panelId, name, initialStatic.duration, currentParsed, options?.loop),
-      { autoplay: options?.autoplay ?? true }
-    );
-    transport = TimelineStore.getTransport(panelId);
-
-    const unsubscribeValues = DialStore.subscribe(panelId, () => {
-      flatValues = DialStore.getValues(panelId);
-    });
-    const unsubscribeTransport = TimelineStore.subscribe(panelId, () => {
+    const persist = options?.persist;
+    const loop = options?.loop;
+    const autoplay = options?.autoplay ?? true;
+    // Store notifications must not become dependencies of this registration.
+    return untrack(() => {
+      DialStore.registerPanel(panelId, name, currentParsed.dialConfig, undefined, {
+        retainOnUnmount: hasStableId,
+        persist,
+        kind: 'timeline',
+      });
+      const initialValues = DialStore.getValues(panelId);
+      flatValues = initialValues;
+      const initialStatic = computeStaticTimeline(currentParsed, initialValues);
+      TimelineStore.register(
+        buildTimelineMeta(panelId, name, initialStatic.duration, currentParsed, loop),
+        { autoplay }
+      );
       transport = TimelineStore.getTransport(panelId);
-    });
 
-    return () => {
-      unsubscribeValues();
-      unsubscribeTransport();
-      TimelineStore.unregister(panelId);
-      DialStore.unregisterPanel(panelId);
-    };
+      const unsubscribeValues = DialStore.subscribe(panelId, () => {
+        flatValues = DialStore.getValues(panelId);
+      });
+      const unsubscribeTransport = TimelineStore.subscribe(panelId, () => {
+        transport = TimelineStore.getTransport(panelId);
+      });
+
+      return () => {
+        unsubscribeValues();
+        unsubscribeTransport();
+        TimelineStore.unregister(panelId);
+        DialStore.unregisterPanel(panelId);
+      };
+    });
   });
 
   $effect(() => {
-    TimelineStore.update(
-      buildTimelineMeta(panelId, name, staticTimeline.duration, parsed, options?.loop)
-    );
+    const meta = buildTimelineMeta(panelId, name, staticTimeline.duration, parsed, options?.loop);
+    untrack(() => TimelineStore.update(meta));
   });
 
   return reactiveProxy(() => resolved) as DialTimelineValues<T>;

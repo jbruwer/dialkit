@@ -164,10 +164,10 @@ function DialTimelineDock(props: DialTimelineProps) {
             class="dialkit-timeline-dock"
             style={{ 'max-height': `min(${dockMaxHeight()}px, calc(100vh - 24px))` }}
           >
-            <For each={timelines()}>
-              {(timeline) => (
+            <For each={timelines().map(timeline => timeline.id)}>
+              {(id) => (
                 <TimelineSection
-                  meta={timeline}
+                  meta={timelines().find(timeline => timeline.id === id)!}
                   defaultOpen={props.defaultOpen ?? true}
                   theme={props.theme ?? 'system'}
                   dockVisible={visible()}
