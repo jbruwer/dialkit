@@ -2,6 +2,8 @@
 
 export const ICON_CHEVRON = 'M6 9.5L12 15.5L18 9.5';
 
+export const ICON_CLOSE = 'M6 6L18 18M18 6L6 18';
+
 export const ICON_CHECK = 'M5 12.75L10 19L19 5';
 
 export const ICON_PAUSE = [

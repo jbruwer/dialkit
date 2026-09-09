@@ -1,7 +1,7 @@
 import { activateOnKey, handleSegmentKey, handleSliderKey, labelSegmentedControl } from '../control-keyboard';
 import { decimalsForStep, roundValue, snapToDecile, formatSliderShortcut, formatToggleShortcut } from '../shortcut-utils';
 import { observeTextSize } from '../text-autosize';
-import { ICON_CHEVRON, ICON_PANEL } from '../icons';
+import { ICON_CLOSE, ICON_CHEVRON, ICON_PANEL } from '../icons';
 import type { ShortcutConfig } from '../store/DialStore';
 import { element, icon, svg, type Mounted } from './dom';
 import { animateSpring } from './animation';
@@ -24,10 +24,6 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
   titleRow.append(title);
   top.append(titleRow);
   const glyph = props.isRoot ? svg('svg', { class: 'dialkit-panel-icon', viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true' }) : icon(ICON_CHEVRON, 'dialkit-folder-icon');
-  if (props.isRoot) {
-    glyph.append(svg('path', { d: ICON_PANEL.path, fill: 'currentColor', opacity: 0.5 }));
-    ICON_PANEL.circles.forEach(c => glyph.append(svg('circle', { ...c, fill: 'currentColor', stroke: 'currentColor', 'stroke-width': 1.25 })));
-  }
   if (!props.inline || !props.isRoot)
     top.append(glyph);
   const toolbar = element('div', 'dialkit-panel-toolbar');
@@ -65,6 +61,14 @@ export function mountFolder(host: HTMLElement, initial: FolderProps) {
     content.style.display = open ? '' : 'none';
     content.inert = !open;
     if (props.isRoot) {
+      glyph.setAttribute('viewBox', open ? '0 0 24 24' : '0 0 16 16');
+      glyph.replaceChildren();
+      if (open) {
+        glyph.append(svg('path', { d: ICON_CLOSE, stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round' }));
+      } else {
+        glyph.append(svg('path', { d: ICON_PANEL.path, fill: 'currentColor', opacity: 0.5 }));
+        ICON_PANEL.circles.forEach(c => glyph.append(svg('circle', { ...c, fill: 'currentColor', stroke: 'currentColor', 'stroke-width': 1.25 })));
+      }
       toolbar.style.display = open ? '' : 'none';
       titleRow.style.display = open ? '' : 'none';
       node.dataset.collapsed = String(!open);

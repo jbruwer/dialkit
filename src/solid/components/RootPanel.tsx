@@ -3,7 +3,7 @@ import { measurePanelHeight } from '../../panel-size';
 import { createSignal, createEffect, on, onCleanup, untrack, Show, JSX } from 'solid-js';
 import { isServer } from 'solid-js/web';
 import { animate } from 'motion';
-import { ICON_PANEL } from '../../icons';
+import { ICON_CLOSE, ICON_PANEL } from '../../icons';
 import type { AnimationHandle } from '../primitives';
 
 export interface RootPanelProps {
@@ -55,7 +55,8 @@ export function RootPanel(props: RootPanelProps) {
           </Show>
 
           <Show when={!inline}>
-            <svg class="dialkit-panel-icon" viewBox="0 0 16 16" fill="none">
+            <svg class="dialkit-panel-icon" viewBox={isOpen() ? "0 0 24 24" : "0 0 16 16"} fill="none">
+              <Show when={isOpen()} fallback={<>
               <path
                 opacity="0.5"
                 d={ICON_PANEL.path}
@@ -64,6 +65,9 @@ export function RootPanel(props: RootPanelProps) {
               <circle cx={ICON_PANEL.circles[0].cx} cy={ICON_PANEL.circles[0].cy} r={ICON_PANEL.circles[0].r} fill="currentColor" stroke="currentColor" stroke-width="1.25" />
               <circle cx={ICON_PANEL.circles[1].cx} cy={ICON_PANEL.circles[1].cy} r={ICON_PANEL.circles[1].r} fill="currentColor" stroke="currentColor" stroke-width="1.25" />
               <circle cx={ICON_PANEL.circles[2].cx} cy={ICON_PANEL.circles[2].cy} r={ICON_PANEL.circles[2].r} fill="currentColor" stroke="currentColor" stroke-width="1.25" />
+              </>}>
+                <path d={ICON_CLOSE} stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </Show>
             </svg>
           </Show>
         </div>

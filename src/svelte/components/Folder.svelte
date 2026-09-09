@@ -8,7 +8,7 @@
   import { slide } from 'svelte/transition';
 
   import type { Snippet } from 'svelte';
-  import { ICON_PANEL, ICON_CHEVRON } from '../../icons';
+  import { ICON_CLOSE, ICON_PANEL, ICON_CHEVRON } from '../../icons';
 
   let {
     title,
@@ -172,7 +172,10 @@
             </div>
           {/if}
 
-          <svg class="dialkit-panel-icon" viewBox="0 0 16 16" fill="none">
+          <svg class="dialkit-panel-icon" viewBox={isOpen ? "0 0 24 24" : "0 0 16 16"} fill="none">
+            {#if isOpen}
+              <path d={ICON_CLOSE} stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            {:else}
             <path
               opacity="0.5"
               d={ICON_PANEL.path}
@@ -181,6 +184,7 @@
             <circle cx={ICON_PANEL.circles[0].cx} cy={ICON_PANEL.circles[0].cy} r={ICON_PANEL.circles[0].r} fill="currentColor" stroke="currentColor" stroke-width="1.25" />
             <circle cx={ICON_PANEL.circles[1].cx} cy={ICON_PANEL.circles[1].cy} r={ICON_PANEL.circles[1].r} fill="currentColor" stroke="currentColor" stroke-width="1.25" />
             <circle cx={ICON_PANEL.circles[2].cx} cy={ICON_PANEL.circles[2].cy} r={ICON_PANEL.circles[2].r} fill="currentColor" stroke="currentColor" stroke-width="1.25" />
+            {/if}
           </svg>
         </div>
 

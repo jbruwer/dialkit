@@ -2,7 +2,7 @@ import { activateOnKey } from '../../control-keyboard';
 import { measurePanelHeight } from '../../panel-size';
 import { computed, defineComponent, h, onMounted, onUnmounted, ref, type PropType, type VNodeChild } from 'vue';
 import { AnimatePresence, motion } from 'motion-v';
-import { ICON_CHEVRON, ICON_PANEL } from '../../icons';
+import { ICON_CLOSE, ICON_CHEVRON, ICON_PANEL } from '../../icons';
 
 export const Folder = defineComponent({
   name: 'DialKitFolder',
@@ -90,7 +90,7 @@ export const Folder = defineComponent({
             h('span', { class: 'dialkit-folder-title' }, props.title),
           ]),
         props.isRoot && !props.inline
-          ? h('svg', { class: 'dialkit-panel-icon', viewBox: '0 0 16 16', fill: 'none' }, [
+          ? h('svg', { class: 'dialkit-panel-icon', viewBox: isOpen.value ? '0 0 24 24' : '0 0 16 16', fill: 'none' }, isOpen.value ? [h('path', { d: ICON_CLOSE, stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round' })] : [
             h('path', {
               opacity: '0.5',
               d: ICON_PANEL.path,
