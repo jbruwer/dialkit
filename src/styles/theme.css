@@ -1388,10 +1388,12 @@
 }
 
 .dialkit-preset-item {
+  box-sizing: border-box;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px 8px 10px;
+  padding: 0 10px;
   gap: 8px;
   border-radius: 8px;
   cursor: pointer;
