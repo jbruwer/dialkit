@@ -2578,3 +2578,40 @@
 .dialkit-toolbar-primary svg {
   color: inherit;
 }
+
+.dialkit-preset-check {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--dial-text-focus);
+}
+
+.dialkit-preset-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--dial-surface-subtle);
+}
+
+.dialkit-preset-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dial-text-label);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.dialkit-preset-create:hover,
+.dialkit-preset-create:focus-visible {
+  background: var(--dial-surface-hover);
+}
