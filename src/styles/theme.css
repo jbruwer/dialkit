@@ -1467,6 +1467,10 @@
   pointer-events: none;
 }
 
+.dialkit-preset-delete:hover svg {
+  color: #ff3b30;
+}
+
 .dialkit-preset-save-btn {
   display: flex;
   align-items: center;
